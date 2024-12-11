@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-    Id                int       `orm:"column(id);pk"`
+    Id                int       `orm:"column(id);auto;pk"`
     Username          string    `orm:"column(username);size(255);null(false)"`
     PasswordHash      string    `orm:"column(password_hash);size(255);null(false)"`
     Status           int       `orm:"column(status);default(1)"`
@@ -19,8 +19,9 @@ type User struct {
     BindToIP         string    `orm:"column(bind_to_ip);size(255);null"`
     EmailConfirmed   int       `orm:"column(email_confirmed);null(false)"`
     ConfirmationToken string    `orm:"column(confirmation_token);size(255);null"`
-    IdWh             uint      `orm:"column(id_wh);null" description:"assigned warehouse if this account is a warehouse admin"`
+    IdWh             uint      `orm:"column(id_wh);null;rel(fk);on_delete(do_nothing);on_update(do_nothing)" description:"assigned warehouse if this account is a warehouse admin"`
     UserLang         string    `orm:"column(user_lang);size(3);null" description:"preffered ui language"`
+    Warehouse        *Warehouse `orm:"rel(one)"`  // Add this line for the foreign key relationship
 }
 
 func init() {
