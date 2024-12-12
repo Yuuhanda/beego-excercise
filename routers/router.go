@@ -24,6 +24,10 @@ func init() {
     beego.Router("/api/item-units/:id", itemUnitController, "delete:Delete")
     beego.Router("/api/item-units/serial/:serialNumber", itemUnitController, "get:GetBySerialNumber")
     beego.Router("/api/item-units/warehouse/:warehouseId", itemUnitController, "get:GetByWarehouse")
+
+    beego.Router("/item", &controllers.ItemController{}, "post:CreateItem")
+    beego.Router("/item/:id", &controllers.ItemController{}, "get:GetItem;put:UpdateItem;delete:DeleteItem")
+    beego.Router("/items", &controllers.ItemController{}, "get:ListItems")
 }
 
 func InitRoutes() {
@@ -41,6 +45,10 @@ func InitRoutes() {
     beego.Router("/api/item-units/:id",  &controllers.ItemUnitController{}, "delete:Delete")
     beego.Router("/api/item-units/serial/:serialNumber",  &controllers.ItemUnitController{}, "get:GetBySerialNumber")
     beego.Router("/api/item-units/warehouse/:warehouseId", &controllers.ItemUnitController{}, "get:GetByWarehouse")
+
+    beego.Router("/item", &controllers.ItemController{}, "post:CreateItem")
+    beego.Router("/item/:id", &controllers.ItemController{}, "get:GetItem;put:UpdateItem;delete:DeleteItem")
+    beego.Router("/items", &controllers.ItemController{}, "get:ListItems")
 
     
 }
