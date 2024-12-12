@@ -243,32 +243,56 @@ func (c *LendingController) Delete() {
     c.ServeJSON()
 }
 
-// GetActiveLoans handles GET request to fetch active loans
 func (c *LendingController) GetActiveLoans() {
-    lendings, err := c.lendingService.GetActiveLoans()
+    filters := map[string]string{
+        "employee_name": c.GetString("employee_name"),
+        "item_name":    c.GetString("item_name"),
+        "serial_number": c.GetString("serial_number"),
+        "username":     c.GetString("username"),
+        "start_date":   c.GetString("start_date"),
+        "end_date":     c.GetString("end_date"),
+    }
+
+    lendings, err := c.lendingService.GetActiveLoans(filters)
     if err != nil {
         c.Data["json"] = map[string]interface{}{
-            "error": err.Error(),
+            "success": false,
+            "message": err.Error(),
         }
         c.ServeJSON()
         return
     }
 
-    c.Data["json"] = lendings
+    c.Data["json"] = map[string]interface{}{
+        "success": true,
+        "data":    lendings,
+    }
     c.ServeJSON()
 }
 
-// GetReturnedLoans handles GET request to fetch returned loans
 func (c *LendingController) GetReturnedLoans() {
-    lendings, err := c.lendingService.GetReturnedLoans()
+    filters := map[string]string{
+        "employee_name": c.GetString("employee_name"),
+        "item_name":    c.GetString("item_name"),
+        "serial_number": c.GetString("serial_number"),
+        "username":     c.GetString("username"),
+        "start_date":   c.GetString("start_date"),
+        "end_date":     c.GetString("end_date"),
+    }
+
+    lendings, err := c.lendingService.GetReturnedLoans(filters)
     if err != nil {
         c.Data["json"] = map[string]interface{}{
-            "error": err.Error(),
+            "success": false,
+            "message": err.Error(),
         }
         c.ServeJSON()
         return
     }
 
-    c.Data["json"] = lendings
+    c.Data["json"] = map[string]interface{}{
+        "success": true,
+        "data":    lendings,
+    }
     c.ServeJSON()
 }

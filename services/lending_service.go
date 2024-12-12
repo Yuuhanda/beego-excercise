@@ -199,17 +199,38 @@ func (s *LendingService) List(page, pageSize int, filters map[string]string) ([]
 
 
 // GetActiveLoans retrieves all active loans (Type = 1)
-func (s *LendingService) GetActiveLoans() ([]*models.Lending, error) {
+func (s *LendingService) GetActiveLoans(filters map[string]string) ([]*models.Lending, error) {
     o := orm.NewOrm()
-    var lendings []*models.Lending
+    qs := o.QueryTable(new(models.Lending)).Filter("Type__IdType", 1)
     
-    _, err := o.QueryTable(new(models.Lending)).Filter("Type__IdType", 1).All(&lendings)
+    // Apply filters
+    if empName := filters["employee_name"]; empName != "" {
+        qs = qs.Filter("IdEmployee__EmpName__icontains", empName)
+    }
+    if itemName := filters["item_name"]; itemName != "" {
+        qs = qs.Filter("IdUnit__Item__ItemName__icontains", itemName)
+    }
+    if serialNumber := filters["serial_number"]; serialNumber != "" {
+        qs = qs.Filter("IdUnit__SerialNumber__icontains", serialNumber)
+    }
+    if username := filters["username"]; username != "" {
+        qs = qs.Filter("IdUser__Username__icontains", username)
+    }
+    if startDate := filters["start_date"]; startDate != "" {
+        qs = qs.Filter("Date__gte", startDate)
+    }
+    if endDate := filters["end_date"]; endDate != "" {
+        qs = qs.Filter("Date__lte", endDate)
+    }
+
+    var lendings []*models.Lending
+    _, err := qs.All(&lendings)
     if err != nil {
         return nil, err
     }
 
+    // Load all related data
     for _, lending := range lendings {
-        // Load ItemUnit and all its relations
         if lending.IdUnit != nil {
             unit := &models.ItemUnit{IdUnit: lending.IdUnit.IdUnit}
             o.Read(unit)
@@ -225,21 +246,18 @@ func (s *LendingService) GetActiveLoans() ([]*models.Lending, error) {
             lending.IdUnit = unit
         }
         
-        // Load User data
         if lending.IdUser != nil {
             user := &models.User{Id: lending.IdUser.Id}
             o.Read(user)
             lending.IdUser = user
         }
         
-        // Load Employee data
         if lending.IdEmployee != nil {
             employee := &models.Employee{IdEmployee: lending.IdEmployee.IdEmployee}
             o.Read(employee)
             lending.IdEmployee = employee
         }
         
-        // Load Type data
         if lending.Type != nil {
             lendType := &models.LendingTypeLookup{IdType: lending.Type.IdType}
             o.Read(lendType)
@@ -250,19 +268,38 @@ func (s *LendingService) GetActiveLoans() ([]*models.Lending, error) {
     return lendings, nil
 }
 
-
-// GetReturnedLoans retrieves all returned loans (Type = 2)
-func (s *LendingService) GetReturnedLoans() ([]*models.Lending, error) {
+func (s *LendingService) GetReturnedLoans(filters map[string]string) ([]*models.Lending, error) {
     o := orm.NewOrm()
-    var lendings []*models.Lending
+    qs := o.QueryTable(new(models.Lending)).Filter("Type__IdType", 2)
     
-    _, err := o.QueryTable(new(models.Lending)).Filter("Type__IdType", 2).All(&lendings)
+    // Apply filters
+    if empName := filters["employee_name"]; empName != "" {
+        qs = qs.Filter("IdEmployee__EmpName__icontains", empName)
+    }
+    if itemName := filters["item_name"]; itemName != "" {
+        qs = qs.Filter("IdUnit__Item__ItemName__icontains", itemName)
+    }
+    if serialNumber := filters["serial_number"]; serialNumber != "" {
+        qs = qs.Filter("IdUnit__SerialNumber__icontains", serialNumber)
+    }
+    if username := filters["username"]; username != "" {
+        qs = qs.Filter("IdUser__Username__icontains", username)
+    }
+    if startDate := filters["start_date"]; startDate != "" {
+        qs = qs.Filter("Date__gte", startDate)
+    }
+    if endDate := filters["end_date"]; endDate != "" {
+        qs = qs.Filter("Date__lte", endDate)
+    }
+
+    var lendings []*models.Lending
+    _, err := qs.All(&lendings)
     if err != nil {
         return nil, err
     }
 
+    // Load all related data
     for _, lending := range lendings {
-        // Load ItemUnit and all its relations
         if lending.IdUnit != nil {
             unit := &models.ItemUnit{IdUnit: lending.IdUnit.IdUnit}
             o.Read(unit)
@@ -278,21 +315,18 @@ func (s *LendingService) GetReturnedLoans() ([]*models.Lending, error) {
             lending.IdUnit = unit
         }
         
-        // Load User data
         if lending.IdUser != nil {
             user := &models.User{Id: lending.IdUser.Id}
             o.Read(user)
             lending.IdUser = user
         }
         
-        // Load Employee data
         if lending.IdEmployee != nil {
             employee := &models.Employee{IdEmployee: lending.IdEmployee.IdEmployee}
             o.Read(employee)
             lending.IdEmployee = employee
         }
         
-        // Load Type data
         if lending.Type != nil {
             lendType := &models.LendingTypeLookup{IdType: lending.Type.IdType}
             o.Read(lendType)
@@ -302,3 +336,4 @@ func (s *LendingService) GetReturnedLoans() ([]*models.Lending, error) {
     
     return lendings, nil
 }
+
