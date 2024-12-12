@@ -5,7 +5,7 @@ import (
 )
 
 type ConditionLookup struct {
-    IdCondition    uint8  `orm:"column(id_condition);auto;pk" description:"primary key"`
+    IdCondition    uint  `orm:"column(id_condition);auto;pk" description:"primary key"`
     ConditionName  string `orm:"column(condition_name);size(255);null(false)"`
 }
 

@@ -9,12 +9,12 @@ type Item struct {
     ItemName    string        `orm:"column(item_name);size(60);null(false)"`
     SKU         string        `orm:"column(SKU);size(50);null(false);unique" description:"Stock Keeping Unit Code"`
     Imagefile   string        `orm:"column(imagefile);size(255);null(false)" description:"item pic"`
-    IdCategory  *int          `orm:"column(id_category);null;rel(fk)" description:"foreign key"`
-    Category    *ItemCategory `orm:"rel(one)"`
+    Category    *ItemCategory `orm:"rel(fk);column(id_category)" description:"foreign key - category"` // Correctly defined as a pointer to ItemCategory
+
 }
 
 func init() {
-    orm.RegisterModel(new(Item))
+    orm.RegisterModel(new(Item)) // Ensure both models are registered
 }
 
 func (i *Item) TableName() string {

@@ -5,7 +5,7 @@ import (
 )
 
 type RepTypeLookup struct {
-    IdRepT   int8   `orm:"column(id_rep_t);auto;pk" description:"primary key"`
+    IdRepT   uint   `orm:"column(id_rep_t);auto;pk" description:"primary key"`
     RepType  string `orm:"column(rep_type);size(255);null(false)" description:"type of log be it repair initiated or closed"`
 }
 

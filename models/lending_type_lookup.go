@@ -5,7 +5,7 @@ import (
 )
 
 type LendingTypeLookup struct {
-    IdType    uint8  `orm:"column(id_type);auto;pk" description:"primary key"`
+    IdType    uint  `orm:"column(id_type);auto;pk" description:"primary key"`
     TypeName  string `orm:"column(type_name);size(30);null(false)" description:"type of lending data be it lending out or returned"`
 }
 
