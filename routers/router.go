@@ -37,6 +37,14 @@ func init() {
     beego.Router("/api/categories", categoryCtrl, "get:List")
     beego.Router("/api/categories/:id", categoryCtrl, "put:Update")
     beego.Router("/api/categories/:id", categoryCtrl, "delete:Delete")
+
+    /// employee Routes
+    employeeCtrl := controllers.NewEmployeeController()
+    beego.Router("/api/employees", employeeCtrl, "get:List")
+    beego.Router("/api/employees", employeeCtrl, "post:Create")
+    beego.Router("/api/employees/:id", employeeCtrl, "get:Get")
+    beego.Router("/api/employees/:id", employeeCtrl, "put:Update")
+    beego.Router("/api/employees/:id", employeeCtrl, "delete:Delete")
 }
 
 func InitRoutes() {
@@ -67,4 +75,12 @@ func InitRoutes() {
     beego.Router("/api/categories", categoryCtrl, "post:Create")
     beego.Router("/api/categories/:id", categoryCtrl, "put:Update")
     beego.Router("/api/categories/:id", categoryCtrl, "delete:Delete")
+
+    employeeCtrl := controllers.NewEmployeeController()
+    // Employee Routes
+    beego.Router("/api/employees", employeeCtrl, "post:Create")
+    beego.Router("/api/employees/:id", employeeCtrl, "get:Get")
+    beego.Router("/api/employees", employeeCtrl, "get:List")
+    beego.Router("/api/employees/:id", employeeCtrl, "put:Update")
+    beego.Router("/api/employees/:id", employeeCtrl, "delete:Delete")
 }

@@ -22,72 +22,175 @@ func NewEmployeeController() *EmployeeController {
 
 // Create handles POST request to create a new employee
 func (c *EmployeeController) Create() {
-    var employee models.Employee
-    if err := json.Unmarshal(c.Ctx.Input.RequestBody, &employee); err != nil {
+    body := c.Ctx.Input.CopyBody(1048576)
+    
+    var input struct {
+        EmpName string `json:"emp_name"`
+        Phone   string `json:"phone"`
+        Email   string `json:"email"`
+        Address string `json:"address"`
+    }
+
+    if err := json.Unmarshal(body, &input); err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
-            "message": "Invalid request body",
+            "message": "Invalid form data",
+            "error":   err.Error(),
+            "received": string(body),
         }
         c.ServeJSON()
         return
     }
 
-    if err := c.employeeService.Create(&employee); err != nil {
-        c.Data["json"] = map[string]interface{}{
-            "success": false,
-            "message": err.Error(),
-        }
-        c.ServeJSON()
-        return
+    employee := &models.Employee{
+        EmpName: input.EmpName,
+        Phone:   input.Phone,
+        Email:   input.Email,
+        Address: input.Address,
     }
 
-    c.Data["json"] = map[string]interface{}{
-        "success": true,
-        "data":    employee,
+    service := services.NewEmployeeService()
+    if err := service.Create(employee); err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Failed to create employee",
+            "error":   err.Error(),
+        }
+    } else {
+        c.Data["json"] = map[string]interface{}{
+            "success": true,
+            "message": "Employee created successfully",
+            "data":    employee,
+        }
     }
     c.ServeJSON()
 }
 
-// Get handles GET request to retrieve an employee by ID
-func (c *EmployeeController) Get() {
+func (c *EmployeeController) Update() {
     idStr := c.Ctx.Input.Param(":id")
     id, err := strconv.ParseUint(idStr, 10, 32)
     if err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
             "message": "Invalid ID format",
+            "error":   err.Error(),
         }
         c.ServeJSON()
         return
     }
 
-    employee, err := c.employeeService.GetByID(uint(id))
+    body := c.Ctx.Input.CopyBody(1048576)
+    
+    var input struct {
+        EmpName string `json:"emp_name,omitempty"`
+        Phone   string `json:"phone,omitempty"`
+        Email   string `json:"email,omitempty"`
+        Address string `json:"address,omitempty"`
+    }
+
+    if err := json.Unmarshal(body, &input); err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Invalid form data",
+            "error":   err.Error(),
+            "received": string(body),
+        }
+        c.ServeJSON()
+        return
+    }
+
+    service := services.NewEmployeeService()
+    existingEmployee, err := service.GetByID(uint(id))
     if err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
-            "message": err.Error(),
+            "message": "Employee not found",
+            "error":   err.Error(),
         }
         c.ServeJSON()
         return
     }
 
-    c.Data["json"] = map[string]interface{}{
-        "success": true,
-        "data":    employee,
+    if input.EmpName != "" {
+        existingEmployee.EmpName = input.EmpName
+    }
+    if input.Phone != "" {
+        existingEmployee.Phone = input.Phone
+    }
+    if input.Email != "" {
+        existingEmployee.Email = input.Email
+    }
+    if input.Address != "" {
+        existingEmployee.Address = input.Address
+    }
+
+    if err := service.Update(existingEmployee); err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Failed to update employee",
+            "error":   err.Error(),
+        }
+    } else {
+        c.Data["json"] = map[string]interface{}{
+            "success": true,
+            "message": "Employee updated successfully",
+            "data":    existingEmployee,
+        }
     }
     c.ServeJSON()
 }
 
-// List handles GET request to retrieve all employees with pagination
+func (c *EmployeeController) Delete() {
+    idStr := c.Ctx.Input.Param(":id")
+    id, err := strconv.ParseUint(idStr, 10, 32)
+    if err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Invalid ID format",
+            "error":   err.Error(),
+        }
+        c.ServeJSON()
+        return
+    }
+
+    service := services.NewEmployeeService()
+    existingEmployee, err := service.GetByID(uint(id))
+    if err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Employee not found",
+            "error":   err.Error(),
+        }
+        c.ServeJSON()
+        return
+    }
+
+    if err := service.Delete(existingEmployee); err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Failed to delete employee",
+            "error":   err.Error(),
+        }
+    } else {
+        c.Data["json"] = map[string]interface{}{
+            "success": true,
+            "message": "Employee deleted successfully",
+        }
+    }
+    c.ServeJSON()
+}
+
 func (c *EmployeeController) List() {
     page, _ := c.GetInt("page", 1)
     pageSize, _ := c.GetInt("pageSize", 10)
 
-    employees, total, err := c.employeeService.List(page, pageSize)
+    service := services.NewEmployeeService()
+    employees, total, err := service.List(page, pageSize)
     if err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
-            "message": err.Error(),
+            "message": "Failed to fetch employees",
+            "error":   err.Error(),
         }
         c.ServeJSON()
         return
@@ -98,27 +201,32 @@ func (c *EmployeeController) List() {
         "data": map[string]interface{}{
             "items": employees,
             "total": total,
+            "page":  page,
         },
     }
     c.ServeJSON()
 }
 
-// Update handles PUT request to update an employee
-func (c *EmployeeController) Update() {
-    var employee models.Employee
-    if err := json.Unmarshal(c.Ctx.Input.RequestBody, &employee); err != nil {
+func (c *EmployeeController) Get() {
+    idStr := c.Ctx.Input.Param(":id")
+    id, err := strconv.ParseUint(idStr, 10, 32)
+    if err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
-            "message": "Invalid request body",
+            "message": "Invalid ID format",
+            "error":   err.Error(),
         }
         c.ServeJSON()
         return
     }
 
-    if err := c.employeeService.Update(&employee); err != nil {
+    service := services.NewEmployeeService()
+    employee, err := service.GetByID(uint(id))
+    if err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
-            "message": err.Error(),
+            "message": "Employee not found",
+            "error":   err.Error(),
         }
         c.ServeJSON()
         return
@@ -127,35 +235,6 @@ func (c *EmployeeController) Update() {
     c.Data["json"] = map[string]interface{}{
         "success": true,
         "data":    employee,
-    }
-    c.ServeJSON()
-}
-
-// Delete handles DELETE request to remove an employee
-func (c *EmployeeController) Delete() {
-    idStr := c.Ctx.Input.Param(":id")
-    id, err := strconv.ParseUint(idStr, 10, 32)
-    if err != nil {
-        c.Data["json"] = map[string]interface{}{
-            "success": false,
-            "message": "Invalid ID format",
-        }
-        c.ServeJSON()
-        return
-    }
-
-    if err := c.employeeService.Delete(uint(id)); err != nil {
-        c.Data["json"] = map[string]interface{}{
-            "success": false,
-            "message": err.Error(),
-        }
-        c.ServeJSON()
-        return
-    }
-
-    c.Data["json"] = map[string]interface{}{
-        "success": true,
-        "message": "Employee deleted successfully",
     }
     c.ServeJSON()
 }
