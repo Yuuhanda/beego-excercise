@@ -45,6 +45,18 @@ func init() {
     beego.Router("/api/employees/:id", employeeCtrl, "get:Get")
     beego.Router("/api/employees/:id", employeeCtrl, "put:Update")
     beego.Router("/api/employees/:id", employeeCtrl, "delete:Delete")
+
+    // Lending Routes
+    lendingCtrl := &controllers.LendingController{}
+    beego.Router("/api/lendings", lendingCtrl, "post:Create")
+    beego.Router("/api/lendings/:id", lendingCtrl, "get:Get")
+    beego.Router("/api/lendings", lendingCtrl, "get:List")
+    beego.Router("/api/lendings/:id", lendingCtrl, "put:Update")
+    beego.Router("/api/lendings/:id", lendingCtrl, "delete:Delete")
+    
+    // Additional lending-specific routes
+    beego.Router("/api/lendings/active", lendingCtrl, "get:GetActiveLoans")
+    beego.Router("/api/lendings/returned", lendingCtrl, "get:GetReturnedLoans")
 }
 
 func InitRoutes() {
@@ -83,4 +95,16 @@ func InitRoutes() {
     beego.Router("/api/employees", employeeCtrl, "get:List")
     beego.Router("/api/employees/:id", employeeCtrl, "put:Update")
     beego.Router("/api/employees/:id", employeeCtrl, "delete:Delete")
+
+    // Lending Routes
+    lendingCtrl := &controllers.LendingController{}
+    beego.Router("/api/lendings", lendingCtrl, "post:Create")
+    beego.Router("/api/lendings/:id", lendingCtrl, "get:Get")
+    beego.Router("/api/lendings", lendingCtrl, "get:List")
+    beego.Router("/api/lendings/:id", lendingCtrl, "put:Update")
+    beego.Router("/api/lendings/:id", lendingCtrl, "delete:Delete")
+    
+    // Additional lending-specific routes
+    beego.Router("/api/lendings/active", lendingCtrl, "get:GetActiveLoans")
+    beego.Router("/api/lendings/returned", lendingCtrl, "get:GetReturnedLoans")
 }
