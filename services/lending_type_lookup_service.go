@@ -21,7 +21,7 @@ func (s *LendingTypeLookupService) Create(lendingType *models.LendingTypeLookup)
     return err
 }
 
-func (s *LendingTypeLookupService) GetByID(id uint8) (*models.LendingTypeLookup, error) {
+func (s *LendingTypeLookupService) GetByID(id uint) (*models.LendingTypeLookup, error) {
     lendingType := &models.LendingTypeLookup{IdType: id}
     err := s.ormer.Read(lendingType)
     if err == orm.ErrNoRows {
@@ -29,7 +29,6 @@ func (s *LendingTypeLookupService) GetByID(id uint8) (*models.LendingTypeLookup,
     }
     return lendingType, err
 }
-
 func (s *LendingTypeLookupService) GetByTypeName(typeName string) (*models.LendingTypeLookup, error) {
     lendingType := &models.LendingTypeLookup{TypeName: typeName}
     err := s.ormer.Read(lendingType, "TypeName")
@@ -47,7 +46,7 @@ func (s *LendingTypeLookupService) Update(lendingType *models.LendingTypeLookup)
     return err
 }
 
-func (s *LendingTypeLookupService) Delete(id uint8) error {
+func (s *LendingTypeLookupService) Delete(id uint) error {
     lendingType := &models.LendingTypeLookup{IdType: id}
     _, err := s.ormer.Delete(lendingType)
     return err

@@ -23,8 +23,10 @@ func (s *RepTypeLookupService) Create(repType *models.RepTypeLookup) error {
 }
 
 // GetByID retrieves repair type by ID
-func (s *RepTypeLookupService) GetByID(id int8) (*models.RepTypeLookup, error) {
-    repType := &models.RepTypeLookup{IdRepT: id}
+func (s *RepTypeLookupService) GetByID(id uint) (*models.RepTypeLookup, error) {
+    repType := &models.RepTypeLookup{
+        IdRepT: id,
+    }
     err := s.ormer.Read(repType)
     if err == orm.ErrNoRows {
         return nil, errors.New("repair type not found")
@@ -42,7 +44,7 @@ func (s *RepTypeLookupService) Update(repType *models.RepTypeLookup) error {
 }
 
 // Delete deletes a repair type
-func (s *RepTypeLookupService) Delete(id int8) error {
+func (s *RepTypeLookupService) Delete(id uint) error {
     repType := &models.RepTypeLookup{IdRepT: id}
     _, err := s.ormer.Delete(repType)
     return err

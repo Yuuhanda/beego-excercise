@@ -23,7 +23,7 @@ func (s *StatusLookupService) Create(status *models.StatusLookup) error {
 }
 
 // GetByID retrieves status by ID
-func (s *StatusLookupService) GetByID(id uint8) (*models.StatusLookup, error) {
+func (s *StatusLookupService) GetByID(id uint) (*models.StatusLookup, error) {
     status := &models.StatusLookup{IdStatus: id}
     err := s.ormer.Read(status)
     if err == orm.ErrNoRows {
@@ -52,7 +52,7 @@ func (s *StatusLookupService) Update(status *models.StatusLookup) error {
 }
 
 // Delete deletes a status
-func (s *StatusLookupService) Delete(id uint8) error {
+func (s *StatusLookupService) Delete(id uint) error {
     status := &models.StatusLookup{IdStatus: id}
     _, err := s.ormer.Delete(status)
     return err
