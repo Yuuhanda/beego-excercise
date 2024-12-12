@@ -28,6 +28,15 @@ func init() {
     beego.Router("/item", &controllers.ItemController{}, "post:CreateItem")
     beego.Router("/item/:id", &controllers.ItemController{}, "get:GetItem;put:UpdateItem;delete:DeleteItem")
     beego.Router("/items", &controllers.ItemController{}, "get:ListItems")
+
+    categoryCtrl := controllers.NewItemCategoryController()
+    
+    // Item Category Routes
+    beego.Router("/api/categories", categoryCtrl, "post:Create")
+    beego.Router("/api/categories/:id", categoryCtrl, "get:Get")
+    beego.Router("/api/categories", categoryCtrl, "get:List")
+    beego.Router("/api/categories/:id", categoryCtrl, "put:Update")
+    beego.Router("/api/categories/:id", categoryCtrl, "delete:Delete")
 }
 
 func InitRoutes() {
@@ -46,9 +55,16 @@ func InitRoutes() {
     beego.Router("/api/item-units/serial/:serialNumber",  &controllers.ItemUnitController{}, "get:GetBySerialNumber")
     beego.Router("/api/item-units/warehouse/:warehouseId", &controllers.ItemUnitController{}, "get:GetByWarehouse")
 
+    // Item routes using the initialized controller instance
     beego.Router("/item", &controllers.ItemController{}, "post:CreateItem")
     beego.Router("/item/:id", &controllers.ItemController{}, "get:GetItem;put:UpdateItem;delete:DeleteItem")
     beego.Router("/items", &controllers.ItemController{}, "get:ListItems")
 
-    
+    // Item Category Routes
+    categoryCtrl := controllers.NewItemCategoryController()
+    beego.Router("/api/categories", categoryCtrl, "get:List")
+    beego.Router("/api/categories/:id", categoryCtrl, "get:Get")
+    beego.Router("/api/categories", categoryCtrl, "post:Create")
+    beego.Router("/api/categories/:id", categoryCtrl, "put:Update")
+    beego.Router("/api/categories/:id", categoryCtrl, "delete:Delete")
 }

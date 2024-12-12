@@ -33,6 +33,8 @@ func InitDatabase() {
             new(models.Lending),
             new(models.DocUploaded),
             new(models.ConditionLookup),
+            new(models.Item),
+            new(models.ItemCategory),
         )
 
         // Setup database connection
