@@ -244,3 +244,36 @@ func (c *ItemController) DeleteItem() {
     }
     c.ServeJSON()
 }
+
+func (c *ItemController) SearchDashboard() {
+    page, _ := strconv.Atoi(c.GetString("page", "1"))
+    pageSize, _ := strconv.Atoi(c.GetString("pageSize", "20"))
+    warehouseId, _ := strconv.Atoi(c.GetString("warehouse_id", "0"))
+
+    filters := make(map[string]interface{})
+    filters["item_name"] = c.GetString("item_name")
+    filters["SKU"] = c.GetString("SKU")
+    filters["category"] = c.GetString("category")
+
+    items, total, err := c.itemService.SearchDashboard(page, pageSize, filters, warehouseId)
+    if err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Failed to search items",
+            "error":   err.Error(),
+        }
+        c.ServeJSON()
+        return
+    }
+
+    c.Data["json"] = map[string]interface{}{
+        "success": true,
+        "data": map[string]interface{}{
+            "items": items,
+            "total": total,
+            "page":  page,
+            "size":  pageSize,
+        },
+    }
+    c.ServeJSON()
+}

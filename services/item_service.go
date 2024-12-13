@@ -96,3 +96,76 @@ func (s *ItemService) Delete(id uint) error {
     _, err := s.ormer.Delete(&models.Item{IdItem: id})
     return err
 }
+
+func (s *ItemService) SearchDashboard(page, pageSize int, filters map[string]interface{}, warehouseId int) ([]map[string]interface{}, int64, error) {
+    o := orm.NewOrm()
+    qb, _ := orm.NewQueryBuilder("mysql")
+
+    // Base query
+    qb.Select("i.item_name",
+        "i.SKU",
+        "COUNT(CASE WHEN TRIM(iu.status) = '1' AND iu.condition != 4 AND iu.condition != 5 THEN 1 END) as available",
+        "COUNT(CASE WHEN TRIM(iu.status) = '2' THEN 1 END) as in_use",
+        "COUNT(CASE WHEN TRIM(iu.status) = '3' THEN 1 END) as in_repair",
+        "COUNT(CASE WHEN TRIM(iu.status) = '4' THEN 1 END) as lost",
+        "i.id_item",
+        "i.imagefile",
+        "ic.category_name as category").
+        From("item i").
+        LeftJoin("item_unit iu ON i.id_item = iu.id_item").
+        LeftJoin("item_category ic ON i.id_category = ic.id_category")
+
+    // Add warehouse filter if specified
+    if warehouseId > 0 {
+        qb.Where("iu.id_wh = ?")
+    }
+
+    // Add filters
+    if name, ok := filters["item_name"].(string); ok && name != "" {
+        qb.And("i.item_name LIKE ?")
+    }
+    if sku, ok := filters["SKU"].(string); ok && sku != "" {
+        qb.And("i.SKU LIKE ?")
+    }
+    if category, ok := filters["category"].(string); ok && category != "" {
+        qb.And("ic.category_name LIKE ?")
+    }
+
+    qb.GroupBy("i.id_item").
+        Limit(pageSize).
+        Offset((page - 1) * pageSize)
+
+    sql := qb.String()
+    var maps []orm.Params
+    var args []interface{}
+
+    // Add filter values to args
+    if warehouseId > 0 {
+        args = append(args, warehouseId)
+    }
+    if name, ok := filters["item_name"].(string); ok && name != "" {
+        args = append(args, "%"+name+"%")
+    }
+    if sku, ok := filters["SKU"].(string); ok && sku != "" {
+        args = append(args, "%"+sku+"%")
+    }
+    if category, ok := filters["category"].(string); ok && category != "" {
+        args = append(args, "%"+category+"%")
+    }
+
+    num, err := o.Raw(sql, args...).Values(&maps)
+    if err != nil {
+        return nil, 0, err
+    }
+
+    // Convert orm.Params to []map[string]interface{}
+    result := make([]map[string]interface{}, len(maps))
+    for i, m := range maps {
+        result[i] = make(map[string]interface{})
+        for k, v := range m {
+            result[i][k] = v
+        }
+    }
+
+    return result, num, nil
+}
