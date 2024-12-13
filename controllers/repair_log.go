@@ -5,8 +5,9 @@ import (
     "myproject/models"
     "myproject/services"
     "strconv"
-
     beego "github.com/beego/beego/v2/server/web"
+    "github.com/beego/beego/v2/client/orm"
+    "net/http"
 )
 
 type RepairLogController struct {
@@ -44,16 +45,39 @@ func (c *RepairLogController) Get() {
     idStr := c.Ctx.Input.Param(":id")
     id, _ := strconv.Atoi(idStr)
 
+    o := orm.NewOrm()
     repairLog, err := c.repairLogService.GetByID(id)
     if err != nil {
-        c.Data["json"] = map[string]interface{}{"error": err.Error()}
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Repair log not found",
+            "error":   err.Error(),
+        }
+        c.Ctx.ResponseWriter.WriteHeader(http.StatusNotFound)
         c.ServeJSON()
         return
     }
 
-    c.Data["json"] = repairLog
+    if repairLog.IdUnit != nil {
+        o.LoadRelated(repairLog.IdUnit, "Item")
+        o.LoadRelated(repairLog.IdUnit, "StatusLookup")
+        o.LoadRelated(repairLog.IdUnit, "Warehouse")
+        o.LoadRelated(repairLog.IdUnit, "CondLookup")
+        o.LoadRelated(repairLog.IdUnit, "User")
+
+        if repairLog.IdUnit.Item != nil {
+            o.LoadRelated(repairLog.IdUnit.Item, "Category")
+        }
+    }
+
+    c.Data["json"] = map[string]interface{}{
+        "success": true,
+        "data":    repairLog,
+    }
     c.ServeJSON()
 }
+
+
 
 // GetByUnit retrieves repair logs by unit ID
 // @router /repair-logs/unit/:unitId [get]
@@ -78,20 +102,31 @@ func (c *RepairLogController) List() {
     page, _ := strconv.Atoi(c.GetString("page", "1"))
     pageSize, _ := strconv.Atoi(c.GetString("pageSize", "10"))
 
-    logs, total, err := c.repairLogService.List(page, pageSize)
-    if err != nil {
-        c.Data["json"] = map[string]interface{}{"error": err.Error()}
-        c.ServeJSON()
-        return
-    }
+    filters := make(map[string]string)
+    filters["item_name"] = c.GetString("item_name")
+    filters["serial_number"] = c.GetString("serial_number")
+    filters["sku"] = c.GetString("sku")
+    filters["warehouse"] = c.GetString("warehouse")
+    filters["rep_type"] = c.GetString("rep_type")
+    filters["start_date"] = c.GetString("start_date")
+    filters["end_date"] = c.GetString("end_date")
 
-    c.Data["json"] = map[string]interface{}{
-        "data":  logs,
-        "total": total,
-        "page":  page,
+    logs, total, err := c.repairLogService.List(page, pageSize, filters)
+    if err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "error": err.Error(),
+        }
+    } else {
+        c.Data["json"] = map[string]interface{}{
+            "data":  logs,
+            "total": total,
+            "page":  page,
+        }
     }
     c.ServeJSON()
 }
+
+
 
 // Update updates a repair log
 // @router /repair-logs/:id [put]

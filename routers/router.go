@@ -67,4 +67,10 @@ func InitRoutes() {
     beego.Router("/api/unit-logs", &controllers.UnitLogController{}, "post:Create;get:List")
     beego.Router("/api/unit-logs/:id", &controllers.UnitLogController{}, "get:Get;put:Update;delete:Delete")
     beego.Router("/api/unit-logs/unit/:unitId", &controllers.UnitLogController{}, "get:GetByUnit")
+
+    // Repair Log Routes
+    beego.Router("/api/repair-logs", &controllers.RepairLogController{}, "post:Create;get:List")
+    beego.Router("/api/repair-logs/:id", &controllers.RepairLogController{}, "get:Get;put:Update;delete:Delete")
+    beego.Router("/api/repair-logs/unit/:unitId", &controllers.RepairLogController{}, "get:GetByUnit")
+
 }
