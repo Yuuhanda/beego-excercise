@@ -7,59 +7,14 @@ import (
 )
 
 func init() {
-    // Get database instance first
     database.GetInstance()
-
-    // Then set up routes
-    beego.Router("/", &controllers.MainController{})
-    beego.Router("/user", &controllers.UserController{}, "post:CreateUser")
-    beego.Router("/user/:id", &controllers.UserController{}, "get:GetUser;put:UpdateUser;delete:DeleteUser")
-    beego.Router("/users", &controllers.UserController{}, "get:ListUsers")
-
-    itemUnitController := controllers.NewItemUnitController()
-    beego.Router("/api/item-units", itemUnitController, "post:Create")
-    beego.Router("/api/item-units/:id", itemUnitController, "get:Get")
-    beego.Router("/api/item-units", itemUnitController, "get:List")
-    beego.Router("/api/item-units/:id", itemUnitController, "put:Update")
-    beego.Router("/api/item-units/:id", itemUnitController, "delete:Delete")
-    beego.Router("/api/item-units/serial/:serialNumber", itemUnitController, "get:GetBySerialNumber")
-    beego.Router("/api/item-units/warehouse/:warehouseId", itemUnitController, "get:GetByWarehouse")
-
-    beego.Router("/item", &controllers.ItemController{}, "post:CreateItem")
-    beego.Router("/item/:id", &controllers.ItemController{}, "get:GetItem;put:UpdateItem;delete:DeleteItem")
-    beego.Router("/items", &controllers.ItemController{}, "get:ListItems")
-
-    categoryCtrl := controllers.NewItemCategoryController()
-    
-    // Item Category Routes
-    beego.Router("/api/categories", categoryCtrl, "post:Create")
-    beego.Router("/api/categories/:id", categoryCtrl, "get:Get")
-    beego.Router("/api/categories", categoryCtrl, "get:List")
-    beego.Router("/api/categories/:id", categoryCtrl, "put:Update")
-    beego.Router("/api/categories/:id", categoryCtrl, "delete:Delete")
-
-    /// employee Routes
-    employeeCtrl := controllers.NewEmployeeController()
-    beego.Router("/api/employees", employeeCtrl, "get:List")
-    beego.Router("/api/employees", employeeCtrl, "post:Create")
-    beego.Router("/api/employees/:id", employeeCtrl, "get:Get")
-    beego.Router("/api/employees/:id", employeeCtrl, "put:Update")
-    beego.Router("/api/employees/:id", employeeCtrl, "delete:Delete")
-
-    // Lending Routes
-    lendingCtrl := &controllers.LendingController{}
-    beego.Router("/api/lendings", lendingCtrl, "post:Create")
-    beego.Router("/api/lendings/:id", lendingCtrl, "get:Get")
-    beego.Router("/api/lendings", lendingCtrl, "get:List")
-    beego.Router("/api/lendings/:id", lendingCtrl, "put:Update")
-    beego.Router("/api/lendings/:id", lendingCtrl, "delete:Delete")
-    
-    // Additional lending-specific routes
-    beego.Router("/api/lendings/active", lendingCtrl, "get:GetActiveLoans")
-    beego.Router("/api/lendings/returned", lendingCtrl, "get:GetReturnedLoans")
+    InitRoutes()
 }
 
 func InitRoutes() {
+    // Get database instance first
+    database.GetInstance()
+
     beego.Router("/", &controllers.MainController{})
     beego.Router("/user", &controllers.UserController{}, "post:CreateUser")
     beego.Router("/user/:id", &controllers.UserController{}, "get:GetUser;put:UpdateUser;delete:DeleteUser")
@@ -107,4 +62,9 @@ func InitRoutes() {
     // Additional lending-specific routes
     beego.Router("/api/lendings/active", lendingCtrl, "get:GetActiveLoans")
     beego.Router("/api/lendings/returned", lendingCtrl, "get:GetReturnedLoans")
+    
+    // Unit Log Routes
+    beego.Router("/api/unit-logs", &controllers.UnitLogController{}, "post:Create;get:List")
+    beego.Router("/api/unit-logs/:id", &controllers.UnitLogController{}, "get:Get;put:Update;delete:Delete")
+    beego.Router("/api/unit-logs/unit/:unitId", &controllers.UnitLogController{}, "get:GetByUnit")
 }
