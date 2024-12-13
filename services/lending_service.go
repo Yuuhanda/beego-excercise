@@ -337,3 +337,119 @@ func (s *LendingService) GetReturnedLoans(filters map[string]string) ([]*models.
     return lendings, nil
 }
 
+
+func (s *LendingService) SearchItemReport(page, pageSize int, filters map[string]string) ([]map[string]interface{}, int64, error) {
+    o := orm.NewOrm()
+    qb, _ := orm.NewQueryBuilder("mysql")
+
+    // Base query for item report
+    qb.Select("i.SKU",
+        "i.item_name",
+        "i.id_item",
+        "COUNT(CASE WHEN l.type = 1 THEN l.id_lending END) as total_item_lent").
+        From("item_unit iu").
+        LeftJoin("lending l ON iu.id_unit = l.id_unit").
+        LeftJoin("item i ON i.id_item = iu.id_item")
+
+    // Add filters
+    if itemName := filters["item_name"]; itemName != "" {
+        qb.Where("i.item_name LIKE ?")
+    }
+    if sku := filters["SKU"]; sku != "" {
+        qb.And("i.SKU LIKE ?")
+    }
+    if idItem := filters["id_item"]; idItem != "" {
+        qb.And("i.id_item = ?")
+    }
+
+    qb.GroupBy("i.id_item").
+        OrderBy("total_item_lent DESC").
+        Limit(pageSize).
+        Offset((page - 1) * pageSize)
+
+    sql := qb.String()
+    var maps []orm.Params
+    var args []interface{}
+
+    // Add filter values to args
+    if itemName := filters["item_name"]; itemName != "" {
+        args = append(args, "%"+itemName+"%")
+    }
+    if sku := filters["SKU"]; sku != "" {
+        args = append(args, "%"+sku+"%")
+    }
+    if idItem := filters["id_item"]; idItem != "" {
+        args = append(args, idItem)
+    }
+
+    num, err := o.Raw(sql, args...).Values(&maps)
+    if err != nil {
+        return nil, 0, err
+    }
+
+    result := make([]map[string]interface{}, len(maps))
+    for i, m := range maps {
+        result[i] = make(map[string]interface{})
+        for k, v := range m {
+            result[i][k] = v
+        }
+    }
+
+    return result, num, nil
+}
+
+func (s *LendingService) SearchUnitReport(page, pageSize int, filters map[string]string) ([]map[string]interface{}, int64, error) {
+    o := orm.NewOrm()
+    qb, _ := orm.NewQueryBuilder("mysql")
+
+    // Base query for unit report
+    qb.Select("iu.serial_number",
+        "i.item_name",
+        "i.id_item",
+        "l.id_unit",
+        "COUNT(l.id_unit) as number_of_times_unit_is_lent").
+        From("item_unit iu").
+        LeftJoin("lending l ON iu.id_unit = l.id_unit").
+        LeftJoin("item i ON i.id_item = iu.id_item")
+
+    // Add filters
+    if itemName := filters["item_name"]; itemName != "" {
+        qb.Where("i.item_name LIKE ?")
+    }
+    if serialNumber := filters["serial_number"]; serialNumber != "" {
+        qb.And("iu.serial_number LIKE ?")
+    }
+
+    qb.GroupBy("l.id_unit").
+        Having("COUNT(l.id_unit) > 0").
+        OrderBy("number_of_times_unit_is_lent DESC").
+        Limit(pageSize).
+        Offset((page - 1) * pageSize)
+
+    sql := qb.String()
+    var maps []orm.Params
+    var args []interface{}
+
+    // Add filter values to args
+    if itemName := filters["item_name"]; itemName != "" {
+        args = append(args, "%"+itemName+"%")
+    }
+    if serialNumber := filters["serial_number"]; serialNumber != "" {
+        args = append(args, "%"+serialNumber+"%")
+    }
+
+    num, err := o.Raw(sql, args...).Values(&maps)
+    if err != nil {
+        return nil, 0, err
+    }
+
+    result := make([]map[string]interface{}, len(maps))
+    for i, m := range maps {
+        result[i] = make(map[string]interface{})
+        for k, v := range m {
+            result[i][k] = v
+        }
+    }
+
+    return result, num, nil
+}

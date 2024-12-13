@@ -60,6 +60,9 @@ func InitRoutes() {
     beego.Router("/api/lendings", lendingCtrl, "get:List")
     beego.Router("/api/lendings/:id", lendingCtrl, "put:Update")
     beego.Router("/api/lendings/:id", lendingCtrl, "delete:Delete")
+    beego.Router("/api/lendings/report/items", &controllers.LendingController{}, "get:SearchItemReport")
+    beego.Router("/api/lendings/report/units", &controllers.LendingController{}, "get:SearchUnitReport")
+
     
     // Additional lending-specific routes
     beego.Router("/api/lendings/active", lendingCtrl, "get:GetActiveLoans")

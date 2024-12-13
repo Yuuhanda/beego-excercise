@@ -296,3 +296,68 @@ func (c *LendingController) GetReturnedLoans() {
     }
     c.ServeJSON()
 }
+
+func (c *LendingController) SearchItemReport() {
+    page, _ := strconv.Atoi(c.GetString("page", "1"))
+    pageSize, _ := strconv.Atoi(c.GetString("pageSize", "20"))
+
+    filters := map[string]string{
+        "item_name": c.GetString("item_name"),
+        "SKU":       c.GetString("SKU"),
+        "id_item":   c.GetString("id_item"),
+    }
+
+    items, total, err := c.lendingService.SearchItemReport(page, pageSize, filters)
+    if err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Failed to get item report",
+            "error":   err.Error(),
+        }
+        c.ServeJSON()
+        return
+    }
+
+    c.Data["json"] = map[string]interface{}{
+        "success": true,
+        "data": map[string]interface{}{
+            "items": items,
+            "total": total,
+            "page":  page,
+            "size":  pageSize,
+        },
+    }
+    c.ServeJSON()
+}
+
+func (c *LendingController) SearchUnitReport() {
+    page, _ := strconv.Atoi(c.GetString("page", "1"))
+    pageSize, _ := strconv.Atoi(c.GetString("pageSize", "20"))
+
+    filters := map[string]string{
+        "item_name":     c.GetString("item_name"),
+        "serial_number": c.GetString("serial_number"),
+    }
+
+    units, total, err := c.lendingService.SearchUnitReport(page, pageSize, filters)
+    if err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Failed to get unit report",
+            "error":   err.Error(),
+        }
+        c.ServeJSON()
+        return
+    }
+
+    c.Data["json"] = map[string]interface{}{
+        "success": true,
+        "data": map[string]interface{}{
+            "units": units,
+            "total": total,
+            "page":  page,
+            "size":  pageSize,
+        },
+    }
+    c.ServeJSON()
+}
