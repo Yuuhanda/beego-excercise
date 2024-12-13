@@ -8,6 +8,7 @@ import (
     beego "github.com/beego/beego/v2/server/web"
     "github.com/beego/beego/v2/client/orm"
     "net/http"
+    "time"
 )
 
 type RepairLogController struct {
@@ -22,22 +23,47 @@ func (c *RepairLogController) Prepare() {
 // Create creates a new repair log
 // @router /repair-logs [post]
 func (c *RepairLogController) Create() {
-    var repairLog models.RepairLog
-    if err := json.Unmarshal(c.Ctx.Input.RequestBody, &repairLog); err != nil {
-        c.Data["json"] = map[string]interface{}{"error": "Invalid request body"}
+    var request struct {
+        IdUnit  uint   `json:"IdUnit"`
+        Comment string `json:"Comment"`
+        RepType uint   `json:"RepType"`
+    }
+
+    if err := json.NewDecoder(c.Ctx.Request.Body).Decode(&request); err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Invalid request body",
+            "error":   err.Error(),
+        }
         c.ServeJSON()
         return
     }
 
-    if err := c.repairLogService.Create(&repairLog); err != nil {
-        c.Data["json"] = map[string]interface{}{"error": err.Error()}
+    repairLog := &models.RepairLog{
+        IdUnit:   &models.ItemUnit{IdUnit: request.IdUnit},
+        Comment:  request.Comment,
+        RepType:  &models.RepTypeLookup{IdRepT: request.RepType},
+        Datetime: time.Now(),
+    }
+
+    if err := c.repairLogService.Create(repairLog); err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Failed to create repair log",
+            "error":   err.Error(),
+        }
         c.ServeJSON()
         return
     }
 
-    c.Data["json"] = repairLog
+    c.Data["json"] = map[string]interface{}{
+        "success": true,
+        "message": "Repair log created successfully",
+        "data":    repairLog,
+    }
     c.ServeJSON()
 }
+
 
 // Get retrieves a repair log by ID
 // @router /repair-logs/:id [get]
@@ -134,23 +160,45 @@ func (c *RepairLogController) Update() {
     idStr := c.Ctx.Input.Param(":id")
     id, _ := strconv.Atoi(idStr)
 
-    var repairLog models.RepairLog
-    if err := json.Unmarshal(c.Ctx.Input.RequestBody, &repairLog); err != nil {
-        c.Data["json"] = map[string]interface{}{"error": "Invalid request body"}
+    var request struct {
+        Comment string `json:"Comment"`
+        RepType uint   `json:"RepType"`
+    }
+
+    if err := json.NewDecoder(c.Ctx.Request.Body).Decode(&request); err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Invalid request body",
+            "error":   err.Error(),
+        }
         c.ServeJSON()
         return
     }
 
-    repairLog.IdRepair = id
-    if err := c.repairLogService.Update(&repairLog); err != nil {
-        c.Data["json"] = map[string]interface{}{"error": err.Error()}
+    repairLog := &models.RepairLog{
+        IdRepair: id,
+        Comment:  request.Comment,
+        RepType:  &models.RepTypeLookup{IdRepT: request.RepType},
+    }
+
+    if err := c.repairLogService.Update(repairLog); err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Failed to update repair log",
+            "error":   err.Error(),
+        }
         c.ServeJSON()
         return
     }
 
-    c.Data["json"] = repairLog
+    c.Data["json"] = map[string]interface{}{
+        "success": true,
+        "message": "Repair log updated successfully",
+        "data":    repairLog,
+    }
     c.ServeJSON()
 }
+
 
 // Delete deletes a repair log
 // @router /repair-logs/:id [delete]

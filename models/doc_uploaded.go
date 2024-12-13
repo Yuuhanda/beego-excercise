@@ -9,7 +9,7 @@ type DocUploaded struct {
     IdDoc     int       `orm:"column(id_doc);auto;pk" description:"primary key"`
     FileName  string    `orm:"column(file_name);size(255);null(false)"`
     Datetime  time.Time `orm:"column(datetime);type(datetime);precision(2);null(false)"`
-    User   *User `orm:"rel(fk);column(user_id)"`
+    UserId    *User `orm:"rel(fk);column(user_id)"`
 }
 
 func init() {

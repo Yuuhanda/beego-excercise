@@ -2,7 +2,6 @@ package services
 
 import (
     "errors"
-    "time"
     "github.com/beego/beego/v2/client/orm"
     "myproject/models"
 )
@@ -19,10 +18,42 @@ func NewRepairLogService() *RepairLogService {
 
 // Create creates a new repair log
 func (s *RepairLogService) Create(repairLog *models.RepairLog) error {
-    repairLog.Datetime = time.Now()
-    _, err := s.ormer.Insert(repairLog)
-    return err
+    o := orm.NewOrm()
+
+    // Verify and load the unit
+    unit := &models.ItemUnit{IdUnit: repairLog.IdUnit.IdUnit}
+    if err := o.Read(unit); err != nil {
+        return errors.New("invalid unit ID")
+    }
+    repairLog.IdUnit = unit
+
+    // Verify and load the repair type
+    repType := &models.RepTypeLookup{IdRepT: repairLog.RepType.IdRepT}
+    if err := o.Read(repType); err != nil {
+        return errors.New("invalid repair type ID")
+    }
+    repairLog.RepType = repType
+
+    // Insert the repair log
+    _, err := o.Insert(repairLog)
+    if err != nil {
+        return err
+    }
+
+    // Load all related data
+    o.LoadRelated(repairLog.IdUnit, "Item")
+    o.LoadRelated(repairLog.IdUnit, "StatusLookup")
+    o.LoadRelated(repairLog.IdUnit, "Warehouse")
+    o.LoadRelated(repairLog.IdUnit, "CondLookup")
+    o.LoadRelated(repairLog.IdUnit, "User")
+
+    if repairLog.IdUnit.Item != nil {
+        o.LoadRelated(repairLog.IdUnit.Item, "Category")
+    }
+
+    return nil
 }
+
 
 // GetByID retrieves repair log by ID
 func (s *RepairLogService) GetByID(id int) (*models.RepairLog, error) {
@@ -47,12 +78,45 @@ func (s *RepairLogService) GetByUnit(unitID int) ([]*models.RepairLog, error) {
 
 // Update updates repair log information
 func (s *RepairLogService) Update(repairLog *models.RepairLog) error {
-    if repairLog.IdRepair == 0 {
-        return errors.New("repair log ID is required")
+    o := orm.NewOrm()
+
+    // Get existing repair log
+    existing := &models.RepairLog{IdRepair: repairLog.IdRepair}
+    if err := o.Read(existing); err != nil {
+        return errors.New("repair log not found")
     }
-    _, err := s.ormer.Update(repairLog)
-    return err
+
+    // Verify and load the repair type
+    repType := &models.RepTypeLookup{IdRepT: repairLog.RepType.IdRepT}
+    if err := o.Read(repType); err != nil {
+        return errors.New("invalid repair type ID")
+    }
+
+    // Update only the specified fields
+    existing.Comment = repairLog.Comment
+    existing.RepType = repType
+
+    // Update the record
+    _, err := o.Update(existing, "Comment", "RepType")
+    if err != nil {
+        return err
+    }
+
+    // Load all related data
+    o.LoadRelated(existing.IdUnit, "Item")
+    o.LoadRelated(existing.IdUnit, "StatusLookup")
+    o.LoadRelated(existing.IdUnit, "Warehouse")
+    o.LoadRelated(existing.IdUnit, "CondLookup")
+    o.LoadRelated(existing.IdUnit, "User")
+
+    if existing.IdUnit.Item != nil {
+        o.LoadRelated(existing.IdUnit.Item, "Category")
+    }
+
+    *repairLog = *existing
+    return nil
 }
+
 
 // Delete deletes a repair log
 func (s *RepairLogService) Delete(id int) error {
