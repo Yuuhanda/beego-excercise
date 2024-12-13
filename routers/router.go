@@ -82,4 +82,10 @@ func InitRoutes() {
     beego.Router("/api/docs", &controllers.DocUploadedController{}, "post:Create;get:List")
     beego.Router("/api/docs/:id", &controllers.DocUploadedController{}, "get:Get;delete:Delete")
 
+    beego.Router("/api/warehouse", &controllers.WarehouseController{}, "post:CreateWarehouse")
+    beego.Router("/api/warehouse/:id", &controllers.WarehouseController{}, "get:GetWarehouse")
+    beego.Router("/api/warehouse/:id", &controllers.WarehouseController{}, "put:UpdateWarehouse")
+    beego.Router("/api/warehouse/:id", &controllers.WarehouseController{}, "delete:DeleteWarehouse")
+    beego.Router("/api/warehouses", &controllers.WarehouseController{}, "get:ListWarehouses")
+    beego.Router("/api/warehouse/:id/users", &controllers.WarehouseController{}, "get:GetWarehouseUsers")
 }

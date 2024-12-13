@@ -59,12 +59,21 @@ func (s *WarehouseService) Delete(id uint) error {
 }
 
 // List retrieves warehouses with pagination
-func (s *WarehouseService) List(page, pageSize int) ([]*models.Warehouse, int64, error) {
+// List retrieves warehouses with pagination and filters
+func (s *WarehouseService) List(page, pageSize int, whName, whAddress string) ([]*models.Warehouse, int64, error) {
     var warehouses []*models.Warehouse
     
     offset := (page - 1) * pageSize
     
     qs := s.ormer.QueryTable(new(models.Warehouse))
+    
+    // Apply filters if provided
+    if whName != "" {
+        qs = qs.Filter("wh_name__icontains", whName)
+    }
+    if whAddress != "" {
+        qs = qs.Filter("wh_address__icontains", whAddress)
+    }
     
     total, err := qs.Count()
     if err != nil {
