@@ -7,6 +7,7 @@ import (
     "myproject/database"
     "github.com/beego/beego/v2/core/logs"
     "fmt"
+    "strings"
 )
 
 type ItemUnitService struct {
@@ -152,11 +153,13 @@ func (s *ItemUnitService) List(page, pageSize int, filters map[string]interface{
         if warehouseId, ok := filters["warehouseId"].(uint); ok && warehouseId > 0 {
             qs = qs.Filter("id_wh", warehouseId)
         }
-        if status, ok := filters["status"].(uint); ok && status > 0 {
-            qs = qs.Filter("status", status)
+        if status, ok := filters["status"].(string); ok && status != "" {
+            statusValues := strings.Split(status, ",")
+            qs = qs.Filter("status__in", statusValues)
         }
-        if condition, ok := filters["condition"].(uint); ok && condition > 0 {
-            qs = qs.Filter("condition", condition)
+        if condition, ok := filters["condition"].(string); ok && condition != "" {
+            conditionValues := strings.Split(condition, ",")
+            qs = qs.Filter("condition__in", conditionValues)
         }
         if userId, ok := filters["userId"].(uint); ok && userId > 0 {
             qs = qs.Filter("updated_by", userId)

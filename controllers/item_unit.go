@@ -129,7 +129,6 @@ func (c *ItemUnitController) List() {
     page, _ := c.GetInt("page", 1)
     pageSize, _ := c.GetInt("pageSize", 10)
     
-    // Get filter parameters
     filters := make(map[string]interface{})
     
     if itemName := c.GetString("itemName"); itemName != "" {
@@ -143,15 +142,11 @@ func (c *ItemUnitController) List() {
             filters["warehouseId"] = uint(warehouseId)
         }
     }
-    if statusStr := c.GetString("status"); statusStr != "" {
-        if status, err := strconv.ParseUint(statusStr, 10, 32); err == nil {
-            filters["status"] = uint(status)
-        }
+    if status := c.GetString("status"); status != "" {
+        filters["status"] = status  // Pass the raw string for comma-separated values
     }
-    if conditionStr := c.GetString("condition"); conditionStr != "" {
-        if condition, err := strconv.ParseUint(conditionStr, 10, 32); err == nil {
-            filters["condition"] = uint(condition)
-        }
+    if condition := c.GetString("condition"); condition != "" {
+        filters["condition"] = condition  // Pass the raw string for comma-separated values
     }
     if userIdStr := c.GetString("userId"); userIdStr != "" {
         if userId, err := strconv.ParseUint(userIdStr, 10, 32); err == nil {
@@ -176,6 +171,7 @@ func (c *ItemUnitController) List() {
     }
     c.ServeJSON()
 }
+
 
 
 // Update handles updating an existing item unit
