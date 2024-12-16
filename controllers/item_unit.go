@@ -1,19 +1,34 @@
 package controllers
 
 import (
-    "encoding/json"
-    "strconv"
-    "github.com/beego/beego/v2/server/web"
-    "myproject/models"
-    "myproject/services"
-    "github.com/beego/beego/v2/client/orm"
-    "github.com/beego/beego/v2/core/logs"
-
+	"encoding/json"
+	"myproject/models"
+	"myproject/services"
+	"strconv"
+	"time"
+	"github.com/beego/beego/v2/client/orm"
+	"github.com/beego/beego/v2/core/logs"
+	"github.com/beego/beego/v2/server/web"
 )
 
 type ItemUnitController struct {
     web.Controller
     itemUnitService *services.ItemUnitService
+    userService      *services.UserService
+    warehouseService *services.WarehouseService
+}
+
+type UpdateItemUnitRequest struct {
+    Comment   string `json:"Comment"`
+    Status    uint   `json:"Status"`
+    IdWh      uint   `json:"IdWh"`
+    Condition uint   `json:"Condition"`
+    UpdatedBy int    `json:"UpdatedBy"`
+}
+
+func (c *ItemUnitController) Prepare() {
+    c.userService = services.NewUserService()
+    c.warehouseService = services.NewWarehouseService()
 }
 
 func NewItemUnitController() *ItemUnitController {
@@ -60,16 +75,60 @@ func (c *ItemUnitController) Create() {
 
     if err := c.itemUnitService.Create(itemUnit); err != nil {
         c.Data["json"] = map[string]interface{}{
-            "error": err.Error(),
+            "success": false,
+            "message": "Failed to create item unit",
+            "error":   err.Error(),
+        }
+    } else {
+        c.Data["json"] = map[string]interface{}{
+            "success": true,
+            "message": "Item unit created successfully",
+            "data":    itemUnit,
+        }
+    }
+    
+    //get username that created the item unit
+    user, err := c.userService.GetByID(input.UpdatedBy)
+    if err != nil {
+        logs.Error("Failed to get user: %v", err)
+        c.Data["json"] = map[string]interface{}{
+            "error": "Failed to get user",
+        }
+        c.ServeJSON()
+        return
+    }
+    //get warehouse name
+    warehouse, err := c.warehouseService.GetByID(input.IdWh)
+    if err != nil {
+        logs.Error("Failed to get warehouse: %v", err)
+        c.Data["json"] = map[string]interface{}{
+            "error": "Failed to get warehouse",
         }
         c.ServeJSON()
         return
     }
 
+    // Create UnitLog
+    unitLogService := services.NewUnitLogService()
+
+    unitLog := &models.UnitLog{
+        IdUnit:       &models.ItemUnit{IdUnit: itemUnit.IdUnit},
+        Content:      input.Comment,
+        ActorsAction: "New Unit added by " + user.Username + " into " + warehouse.WhName,
+        UpdateAt:     time.Now(),
+    }
+
+
+    err = unitLogService.Create(unitLog)
+    if err != nil {
+        // Handle error case
+        logs.Error("Failed to create unit log: %v", err)
+    }
+
     c.Data["json"] = itemUnit
     c.ServeJSON()
-}
 
+}
 
 
 
@@ -176,51 +235,94 @@ func (c *ItemUnitController) List() {
 
 // Update handles updating an existing item unit
 func (c *ItemUnitController) Update() {
-    var input struct {
-        IdUnit       uint   `json:"IdUnit"`
-        SerialNumber string `json:"SerialNumber"`
-        Comment      string `json:"Comment"`
-        IdItem       uint   `json:"IdItem"`
-        Status       uint   `json:"Status"`
-        IdWh         uint   `json:"IdWh"`
-        Condition    uint   `json:"Condition"`
-        UpdatedBy    int    `json:"UpdatedBy"`
+    // Log the raw request body
+    logs.Info("Raw request body: %s", string(c.Ctx.Input.RequestBody))
+
+    idStr := c.Ctx.Input.Param(":id")
+    id, err := strconv.ParseUint(idStr, 10, 32)
+    if err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Invalid ID format",
+        }
+        c.ServeJSON()
+        return
     }
 
-    body := c.Ctx.Input.CopyBody(1048576)
-    logs.Info("Raw request body: %s", string(body))
-    
-    if err := json.Unmarshal(body, &input); err != nil {
-        logs.Error("JSON unmarshal error: %v", err)
+    body := c.Ctx.Input.CopyBody(1048576) // Copy request body with sufficient buffer
+
+    var req UpdateItemUnitRequest
+    if err := json.Unmarshal(body, &req); err != nil {
         c.Data["json"] = map[string]interface{}{
-            "error": "Invalid request body",
-            "details": err.Error(),
+            "success": false,
+            "message": "Invalid request format",
+            "error":   err.Error(),
             "received": string(body),
         }
         c.ServeJSON()
         return
     }
-
     itemUnit := &models.ItemUnit{
-        IdUnit:       input.IdUnit,
-        SerialNumber: input.SerialNumber,
-        Comment:      input.Comment,
-        Item:         &models.Item{IdItem: input.IdItem},
-        StatusLookup: &models.StatusLookup{IdStatus: input.Status},
-        Warehouse:    &models.Warehouse{IdWh: input.IdWh},
-        CondLookup:   &models.ConditionLookup{IdCondition: input.Condition},
-        User:         &models.User{Id: input.UpdatedBy},
+        IdUnit:      uint(id),
+        Comment:     req.Comment,
+        StatusLookup: &models.StatusLookup{IdStatus: req.Status},
+        Warehouse:   &models.Warehouse{IdWh: req.IdWh},
+        CondLookup:  &models.ConditionLookup{IdCondition: req.Condition},
+        User:        &models.User{Id: req.UpdatedBy},
     }
 
     if err := c.itemUnitService.Update(itemUnit); err != nil {
         c.Data["json"] = map[string]interface{}{
-            "error": err.Error(),
+            "success": false,
+            "message": "Failed to update item unit",
+            "error":   err.Error(),
+        }
+    } else {
+        c.Data["json"] = map[string]interface{}{
+            "success": true,
+            "message": "Item unit updated successfully",
+            "data":    itemUnit,
+        }
+    }
+
+    //get username that created the item unit
+    user, err := c.userService.GetByID(req.UpdatedBy)
+    if err != nil {
+        logs.Error("Failed to get user: %v", err)
+        c.Data["json"] = map[string]interface{}{
+            "error": "Failed to get user",
+        }
+        c.ServeJSON()
+        return
+    }
+    //get warehouse name
+    warehouse, err := c.warehouseService.GetByID(req.IdWh)
+    if err != nil {
+        logs.Error("Failed to get warehouse: %v", err)
+        c.Data["json"] = map[string]interface{}{
+            "error": "Failed to get warehouse",
         }
         c.ServeJSON()
         return
     }
 
-    c.Data["json"] = itemUnit
+    // Create UnitLog
+    unitLogService := services.NewUnitLogService()
+
+    unitLog := &models.UnitLog{
+        IdUnit:       &models.ItemUnit{IdUnit: itemUnit.IdUnit},
+        Content:      req.Comment,
+        ActorsAction: "Unit " + itemUnit.SerialNumber +" updated by " + user.Username + " in " + warehouse.WhName,
+        UpdateAt:     time.Now(),
+    }
+
+
+    err = unitLogService.Create(unitLog)
+    if err != nil {
+        // Handle error case
+        logs.Error("Failed to create unit log: %v", err)
+    }
+
     c.ServeJSON()
 }
 

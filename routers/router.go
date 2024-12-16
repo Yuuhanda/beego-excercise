@@ -77,6 +77,7 @@ func InitRoutes() {
     beego.Router("/api/repair-logs", &controllers.RepairLogController{}, "post:Create;get:List")
     beego.Router("/api/repair-logs/:id", &controllers.RepairLogController{}, "get:Get;put:Update;delete:Delete")
     beego.Router("/api/repair-logs/unit/:unitId", &controllers.RepairLogController{}, "get:GetByUnit")
+    beego.Router("/api/repair-logs/finish", &controllers.RepairLogController{}, "post:Finish")
 
     // Document Upload Routes
     beego.Router("/api/docs", &controllers.DocUploadedController{}, "post:Create;get:List")

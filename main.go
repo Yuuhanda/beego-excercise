@@ -7,6 +7,7 @@ import (
     "os"
     "os/signal"
     "syscall"
+    "time"
     _ "myproject/routers"
     _ "myproject/database"
     _ "myproject/services"
@@ -29,5 +30,7 @@ func main() {
 }
 
 func init() {
+    os.Setenv("TZ", "Asia/Jakarta")
+    time.Local = time.FixedZone("WIB", 7*60*60) // WIB = UTC+7
     database.InitDatabase()
 }
