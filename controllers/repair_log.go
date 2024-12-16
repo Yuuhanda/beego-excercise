@@ -301,7 +301,7 @@ func (c *RepairLogController) Finish() {
         IdUnit    uint   `json:"IdUnit"`
         Comment   string `json:"Comment"`
         IdUser    uint   `json:"IdUser"`
-        Condition uint   `json:"Condition"` 
+        Condition uint   `json:"Condition"`
         IdWh      uint   `json:"IdWh"`
     }
 
@@ -313,6 +313,39 @@ func (c *RepairLogController) Finish() {
         }
         c.ServeJSON()
         return
+    }
+
+    //Get existing item unit first
+    itemUnitService := services.NewItemUnitService()
+    existingItemUnit, err := itemUnitService.Get(int(request.IdUnit))
+    if err != nil {
+        logs.Error("Failed to get existing item unit: %v", err)
+        c.Data["json"] = map[string]interface{}{
+            "error": "Failed to get existing item unit",
+        }
+        c.ServeJSON()
+        return
+    }
+
+    // Determine warehouse ID and name
+    var warehouseName string
+    var warehouseId uint
+    
+    if request.IdWh != 0 {
+        warehouse, err := c.warehouseService.GetByID(request.IdWh)
+        if err != nil {
+            logs.Error("Failed to get warehouse: %v", err)
+            c.Data["json"] = map[string]interface{}{
+                "error": "Failed to get warehouse",
+            }
+            c.ServeJSON()
+            return
+        }
+        warehouseName = warehouse.WhName
+        warehouseId = request.IdWh
+    } else {
+        warehouseName = existingItemUnit.Warehouse.WhName
+        warehouseId = existingItemUnit.Warehouse.IdWh
     }
 
     repairLog := &models.RepairLog{
@@ -332,23 +365,11 @@ func (c *RepairLogController) Finish() {
         return
     }
 
-    //update item unit
-    itemUnitService := services.NewItemUnitService()
-    existingItemUnit, err := itemUnitService.Get(int(request.IdUnit))
-    if err != nil {
-        logs.Error("Failed to get existing item unit: %v", err)
-        c.Data["json"] = map[string]interface{}{
-            "error": "Failed to get existing item unit",
-        }
-        c.ServeJSON()
-        return
-    }
-
     updatedItemUnit := &models.ItemUnit{
         IdUnit:       uint(request.IdUnit),
         Comment:      existingItemUnit.Comment,
-        StatusLookup: &models.StatusLookup{IdStatus: uint(3)},
-        Warehouse:    &models.Warehouse{IdWh: uint(existingItemUnit.Warehouse.IdWh)},
+        StatusLookup: &models.StatusLookup{IdStatus: uint(1)},
+        Warehouse:    &models.Warehouse{IdWh: warehouseId},
         CondLookup:   &models.ConditionLookup{IdCondition: request.Condition},
         User:         &models.User{Id: existingItemUnit.User.Id},
     }
@@ -373,22 +394,6 @@ func (c *RepairLogController) Finish() {
         return
     }
 
-    var warehouseName string
-    if request.IdWh != 0 {
-        warehouse, err := c.warehouseService.GetByID(request.IdWh)
-        if err != nil {
-            logs.Error("Failed to get warehouse: %v", err)
-            c.Data["json"] = map[string]interface{}{
-                "error": "Failed to get warehouse",
-            }
-            c.ServeJSON()
-            return
-        }
-        warehouseName = warehouse.WhName
-    } else {
-        warehouseName = existingItemUnit.Warehouse.WhName
-    }
-
     unitLogService := services.NewUnitLogService()
     unitLog := &models.UnitLog{
         IdUnit:       &models.ItemUnit{IdUnit: existingItemUnit.IdUnit},
@@ -409,3 +414,4 @@ func (c *RepairLogController) Finish() {
     }
     c.ServeJSON()
 }
+
