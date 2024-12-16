@@ -8,6 +8,7 @@ import (
     "github.com/beego/beego/v2/core/logs"
     "fmt"
     "strings"
+    "strconv"
 )
 
 type ItemUnitService struct {
@@ -48,6 +49,10 @@ func (s *ItemUnitService) Create(itemUnit *models.ItemUnit) error {
 
 
 func (s *ItemUnitService) Get(id int) (*models.ItemUnit, error) {
+    if s.ormer == nil {
+        s.ormer = orm.NewOrm()
+    }
+    
     if id <= 0 {
         return nil, errors.New("invalid item unit ID")
     }
@@ -98,7 +103,20 @@ func (s *ItemUnitService) Update(itemUnit *models.ItemUnit) error {
         return err
     }
 
+    // Generate serial number if empty and item is changing
+    if itemUnit.SerialNumber == "" && itemUnit.Item != nil && itemUnit.Item.IdItem > 0 {
+        generatedSN, err := s.GenerateSerialNumber(itemUnit.Item.IdItem)
+        if err != nil {
+            return err
+        }
+        itemUnit.SerialNumber = generatedSN
+        existing.SerialNumber = generatedSN
+    }
+
     // Update only non-empty fields
+    if itemUnit.SerialNumber != "" {
+        existing.SerialNumber = itemUnit.SerialNumber
+    }
     if itemUnit.Comment != "" {
         existing.Comment = itemUnit.Comment
     }
@@ -120,6 +138,9 @@ func (s *ItemUnitService) Update(itemUnit *models.ItemUnit) error {
 
     // Update only the fields that were provided
     cols := []string{}
+    if itemUnit.SerialNumber != "" {
+        cols = append(cols, "SerialNumber")
+    }
     if itemUnit.Comment != "" {
         cols = append(cols, "Comment")
     }
@@ -157,6 +178,7 @@ func (s *ItemUnitService) Update(itemUnit *models.ItemUnit) error {
 
     return nil
 }
+
 
 func (s *ItemUnitService) Delete(id uint) error {
     itemUnit := &models.ItemUnit{IdUnit: id}
@@ -252,3 +274,40 @@ func (s *ItemUnitService) GetByStatus(status uint8) ([]*models.ItemUnit, error) 
         
     return itemUnits, err
 }
+
+//auto generate serial number
+func (s *ItemUnitService) GenerateSerialNumber(itemID uint) (string, error) {
+    o := orm.NewOrm()
+    
+    // Get the item to access its SKU
+    item := &models.Item{IdItem: itemID}
+    if err := o.QueryTable(new(models.Item)).Filter("IdItem", itemID).One(item); err != nil {
+        logs.Error("Failed to read item: %v", err)
+        return "", err
+    }
+    
+    // Get the latest serial number for this item
+    var latestUnit models.ItemUnit
+    err := o.QueryTable(new(models.ItemUnit)).
+        Filter("Item__IdItem", itemID).
+        OrderBy("-SerialNumber").
+        Limit(1).One(&latestUnit)
+    
+    var nextSeq int
+    if err == orm.ErrNoRows {
+        nextSeq = 1
+    } else if err != nil {
+        return "", err
+    } else {
+        parts := strings.Split(latestUnit.SerialNumber, "-")
+        lastSeq, _ := strconv.Atoi(parts[len(parts)-1])
+        nextSeq = lastSeq + 1
+    }
+    
+    serialNumber := fmt.Sprintf("%s-%04d", item.SKU, nextSeq)
+    
+    return serialNumber, nil
+}
+
+
+

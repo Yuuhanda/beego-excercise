@@ -12,10 +12,12 @@ import (
 type ItemController struct {
     web.Controller
     itemService *services.ItemService
+    itemCategoryService *services.ItemCategoryService
 }
 
 func (c *ItemController) Prepare() {
     c.itemService = services.NewItemService()
+    c.itemCategoryService = services.NewItemCategoryService()
 }
 
 // CreateItem handles item creation
@@ -23,13 +25,13 @@ func (c *ItemController) Prepare() {
 
 func (c *ItemController) CreateItem() {
     // Read the request body
-    body := c.Ctx.Input.CopyBody(1048576) // Read up to 1MB
+    body := c.Ctx.Input.CopyBody(1048576)
     
     var input struct {
         ItemName    string `json:"ItemName"`
         SKU         string `json:"SKU"`
         Imagefile   string `json:"Imagefile"`
-        CategoryId  int    `json:"CategoryId"`
+        CategoryId  uint   `json:"CategoryId"` // Changed to uint to match model
     }
 
     if err := json.Unmarshal(body, &input); err != nil {
@@ -37,17 +39,43 @@ func (c *ItemController) CreateItem() {
             "success": false,
             "message": "Invalid form data",
             "error":   err.Error(),
-            "received": string(body),  // This will show what was actually received
+            "received": string(body),
         }
         c.ServeJSON()
         return
     }
 
+    // First verify the category exists using itemService
+    category, err := c.itemCategoryService.GetByID(int(input.CategoryId))
+    if err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Invalid category",
+            "error":   err.Error(),
+        }
+        c.ServeJSON()
+        return
+    }
+
+    // Create item with verified category
     item := &models.Item{
         ItemName:  input.ItemName,
         SKU:       input.SKU,
         Imagefile: input.Imagefile,
-        Category:  &models.ItemCategory{IdCategory: input.CategoryId},
+        Category:  category,
+    }
+
+    // Generate SKU if empty
+    if input.SKU == "" {
+        if err := c.itemService.GenerateSKU(item); err != nil {
+            c.Data["json"] = map[string]interface{}{
+                "success": false,
+                "message": "Failed to generate SKU",
+                "error":   err.Error(),
+            }
+            c.ServeJSON()
+            return
+        }
     }
 
     if err := c.itemService.Create(item); err != nil {
@@ -65,6 +93,7 @@ func (c *ItemController) CreateItem() {
     }
     c.ServeJSON()
 }
+
 
 
 // GetItem retrieves item by ID
@@ -185,6 +214,20 @@ func (c *ItemController) UpdateItem() {
         return
     }
 
+    // Verify category if provided
+    if input.CategoryId != nil {
+        if _, err := c.itemCategoryService.GetByID(*input.CategoryId); err != nil {
+            c.Data["json"] = map[string]interface{}{
+                "success": false,
+                "message": "Invalid category",
+                "error":   err.Error(),
+            }
+            c.ServeJSON()
+            return
+        }
+        item.Category = &models.ItemCategory{IdCategory: *input.CategoryId}
+    }
+
     // Update only provided fields
     if input.ItemName != nil {
         item.ItemName = *input.ItemName
@@ -195,10 +238,20 @@ func (c *ItemController) UpdateItem() {
     if input.Imagefile != nil {
         item.Imagefile = *input.Imagefile
     }
-    if input.CategoryId != nil {
-        item.Category = &models.ItemCategory{IdCategory: *input.CategoryId}
-    }
 
+    // Generate SKU if provided SKU is empty string
+    if input.SKU != nil && *input.SKU == "" {
+        if err := c.itemService.GenerateSKU(item); err != nil {
+            c.Data["json"] = map[string]interface{}{
+                "success": false,
+                "message": "Failed to generate SKU",
+                "error":   err.Error(),
+            }
+            c.ServeJSON()
+            return
+        }
+    }
+    
     if err := c.itemService.Update(item); err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
@@ -214,6 +267,7 @@ func (c *ItemController) UpdateItem() {
     }
     c.ServeJSON()
 }
+
 
 
 // DeleteItem deletes an item

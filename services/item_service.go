@@ -3,6 +3,8 @@ package services
 import (
     "github.com/beego/beego/v2/client/orm"
     "myproject/models"
+    "time"
+    "fmt"
 )
 
 type ItemService struct {
@@ -168,4 +170,41 @@ func (s *ItemService) SearchDashboard(page, pageSize int, filters map[string]int
     }
 
     return result, num, nil
+}
+
+
+//auto generate SKU
+func (s *ItemService) GenerateSKU(item *models.Item) error {
+    o := orm.NewOrm()
+    
+    // First read the category to get its data
+    category := &models.ItemCategory{IdCategory: item.Category.IdCategory}
+    if err := o.Read(category); err != nil {
+        return err
+    }
+    
+    // Get current year's last 2 digits
+    year := time.Now().Year() % 100
+    
+    // Get count of items in same category for serial number
+    count, err := o.QueryTable(new(models.Item)).
+        Filter("Category__IdCategory", category.IdCategory).
+        Count()
+    if err != nil {
+        return err
+    }
+    
+    // Generate serial number (increment count by 1)
+    serialNum := count + 1
+    
+    // Format: CatCode + YY + SerialNumber (padded to 4 digits)
+    item.SKU = fmt.Sprintf("%s%02d-%04d",
+        category.CatCode,
+        year,
+        serialNum)
+    
+    // Set the loaded category back to item
+    item.Category = category
+    
+    return nil
 }
