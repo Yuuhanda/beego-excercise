@@ -109,6 +109,10 @@ func (s *UnitLogService) List(page, pageSize int, filters map[string]string) ([]
         qs = qs.Filter("UpdateAt__lte", endDate)
     }
 
+    if actorsAction := filters["actors_action"]; actorsAction != "" {
+        qs = qs.Filter("ActorsAction__icontains", actorsAction)
+    }
+
     total, err := qs.Count()
     if err != nil {
         return nil, 0, err

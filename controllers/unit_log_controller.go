@@ -24,9 +24,10 @@ func (c *UnitLogController) Prepare() {
 // @router /unit-logs [post]
 func (c *UnitLogController) Create() {
     var request struct {
-        IdUnit   uint      `json:"IdUnit"`
-        Content  string    `json:"Content"`
-        UpdateAt time.Time `json:"UpdateAt,omitempty"`
+        IdUnit       uint      `json:"IdUnit"`
+        Content      string    `json:"Content"`
+        ActorsAction string    `json:"ActorsAction"`
+        UpdateAt     time.Time `json:"UpdateAt,omitempty"`
     }
 
     err := json.NewDecoder(c.Ctx.Request.Body).Decode(&request)
@@ -41,9 +42,10 @@ func (c *UnitLogController) Create() {
     }
 
     unitLog := &models.UnitLog{
-        IdUnit:   &models.ItemUnit{IdUnit: request.IdUnit},
-        Content:  request.Content,
-        UpdateAt: time.Now(),
+        IdUnit:       &models.ItemUnit{IdUnit: request.IdUnit},
+        Content:      request.Content,
+        ActorsAction: request.ActorsAction,
+        UpdateAt:     time.Now(),
     }
 
     if request.UpdateAt.IsZero() {
@@ -187,9 +189,10 @@ func (c *UnitLogController) Update() {
     id, _ := strconv.Atoi(idStr)
 
     var request struct {
-        IdUnit   uint      `json:"IdUnit"`
-        Content  string    `json:"Content"`
-        UpdateAt time.Time `json:"UpdateAt,omitempty"`
+        IdUnit       uint      `json:"IdUnit"`
+        Content      string    `json:"Content"`
+        ActorsAction string    `json:"ActorsAction"`
+        UpdateAt     time.Time `json:"UpdateAt,omitempty"`
     }
 
     err := json.NewDecoder(c.Ctx.Request.Body).Decode(&request)
@@ -204,10 +207,11 @@ func (c *UnitLogController) Update() {
     }
 
     unitLog := &models.UnitLog{
-        IdLog:    id,
-        IdUnit:   &models.ItemUnit{IdUnit: request.IdUnit},
-        Content:  request.Content,
-        UpdateAt: time.Now(),
+        IdLog:        id,
+        IdUnit:       &models.ItemUnit{IdUnit: request.IdUnit},
+        Content:      request.Content,
+        ActorsAction: request.ActorsAction,
+        UpdateAt:     time.Now(),
     }
 
     if err := c.unitLogService.Update(unitLog); err != nil {

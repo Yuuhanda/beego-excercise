@@ -17,17 +17,33 @@ type ItemUnitService struct {
 
 func NewItemUnitService() *ItemUnitService {
     return &ItemUnitService{
-        ormer: database.GetOrmer(),
+        ormer: database.GetOrmer(), // Use the database package to get the ORMer instance
     }
 }
+
 // Create creates a new item unit
 func (s *ItemUnitService) Create(itemUnit *models.ItemUnit) error {
     o := orm.NewOrm()
+    
+    // Insert the new item unit
     _, err := o.Insert(itemUnit)
-    return err
+    if err != nil {
+        return err
+    }
+    
+    // Load all related data
+    o.LoadRelated(itemUnit, "Item")
+    o.LoadRelated(itemUnit, "StatusLookup")
+    o.LoadRelated(itemUnit, "Warehouse")
+    o.LoadRelated(itemUnit, "CondLookup")
+    o.LoadRelated(itemUnit, "User")
+    
+    if itemUnit.Item != nil {
+        o.LoadRelated(itemUnit.Item, "Category")
+    }
+
+    return nil
 }
-
-
 
 
 
@@ -124,9 +140,23 @@ func (s *ItemUnitService) Update(itemUnit *models.ItemUnit) error {
     }
 
     _, err := o.Update(existing, cols...)
-    return err
-}
+    if err != nil {
+        return err
+    }
+    
+    // Load all related data
+    o.LoadRelated(itemUnit, "Item")
+    o.LoadRelated(itemUnit, "StatusLookup")
+    o.LoadRelated(itemUnit, "Warehouse")
+    o.LoadRelated(itemUnit, "CondLookup")
+    o.LoadRelated(itemUnit, "User")
+    
+    if itemUnit.Item != nil {
+        o.LoadRelated(itemUnit.Item, "Category")
+    }
 
+    return nil
+}
 
 func (s *ItemUnitService) Delete(id uint) error {
     itemUnit := &models.ItemUnit{IdUnit: id}
