@@ -129,7 +129,7 @@ func (c *ItemUnitController) Create() {
     unitLog := &models.UnitLog{
         IdUnit:       &models.ItemUnit{IdUnit: itemUnit.IdUnit},
         Content:      input.Comment,
-        ActorsAction: "New Unit added by " + user.Username + " into " + warehouse.WhName,
+        ActorsAction: "New Unit "+ input.SerialNumber +" added by " + user.Username + " into " + warehouse.WhName,
         UpdateAt:     time.Now(),
     }
 
