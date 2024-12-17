@@ -8,6 +8,8 @@ import (
     "myproject/services"
     "time"
     "github.com/beego/beego/v2/core/logs"
+    "fmt"
+    "path/filepath"
 )
 
 type LendingController struct {
@@ -618,3 +620,51 @@ func (c *LendingController) Return() {
     c.ServeJSON()
 }
 
+
+// GetLoanImage serves the lending's loan picture
+// @router /lending/:id/loan-image [get]
+// how to use it
+// const loanImageUrl = `http://your-api-domain/lending/${lendingId}/loan-image`;
+// const returnImageUrl = `http://your-api-domain/lending/${lendingId}/return-image`;
+
+func (c *LendingController) GetLoanImage() {
+    idStr := c.Ctx.Input.Param(":id")
+    var id uint
+    if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+        c.Ctx.Output.Status = 400
+        c.Ctx.Output.Body([]byte("Invalid lending ID"))
+        return
+    }
+
+    lending, err := c.lendingService.GetByID(id)
+    if err != nil {
+        c.Ctx.Output.Status = 404
+        c.Ctx.Output.Body([]byte("Lending not found"))
+        return
+    }
+
+    imagePath := filepath.Join("static/uploads/lending", lending.PicLoan)
+    c.Ctx.Output.Download(imagePath, lending.PicLoan)
+}
+
+// GetReturnImage serves the lending's return picture
+// @router /lending/:id/return-image [get]
+func (c *LendingController) GetReturnImage() {
+    idStr := c.Ctx.Input.Param(":id")
+    var id uint
+    if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+        c.Ctx.Output.Status = 400
+        c.Ctx.Output.Body([]byte("Invalid lending ID"))
+        return
+    }
+
+    lending, err := c.lendingService.GetByID(id)
+    if err != nil {
+        c.Ctx.Output.Status = 404
+        c.Ctx.Output.Body([]byte("Lending not found"))
+        return
+    }
+
+    imagePath := filepath.Join("static/uploads/lending/return", lending.PicReturn)
+    c.Ctx.Output.Download(imagePath, lending.PicReturn)
+}

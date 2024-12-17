@@ -35,6 +35,7 @@ func InitRoutes() {
     beego.Router("/api/item/:id", &controllers.ItemController{}, "get:GetItem;put:UpdateItem;delete:DeleteItem")
     beego.Router("/api/items", &controllers.ItemController{}, "get:ListItems")
     beego.Router("/api/items/dashboard", &controllers.ItemController{}, "get:SearchDashboard")
+    //item image route
     beego.Router("/api/item/:id/image", &controllers.ItemController{}, "get:GetItemImage")
 
     // Item Category Routes
@@ -63,6 +64,9 @@ func InitRoutes() {
     beego.Router("/api/lendings/report/items", &controllers.LendingController{}, "get:SearchItemReport")
     beego.Router("/api/lendings/report/units", &controllers.LendingController{}, "get:SearchUnitReport")
     beego.Router("/api/lendings/return/:id", &controllers.LendingController{}, "put:Return")
+    // Lending images routes
+    beego.Router("/lending/:id/loan-image", &controllers.LendingController{}, "get:GetLoanImage")
+    beego.Router("/lending/:id/return-image", &controllers.LendingController{}, "get:GetReturnImage")
 
     // Additional lending-specific routes
     beego.Router("/api/lendings/active", lendingCtrl, "get:GetActiveLoans")
