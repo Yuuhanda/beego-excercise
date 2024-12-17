@@ -116,6 +116,16 @@ func (s *ItemUnitService) GetBySerialNumber(serialNumber string) (*models.ItemUn
     s.ormer.LoadRelated(itemUnit, "Warehouse")
     s.ormer.LoadRelated(itemUnit, "CondLookup")
     s.ormer.LoadRelated(itemUnit, "User")
+
+    // Convert to SimpleUser
+    if itemUnit.User != nil {
+        simpleUser := &SimpleUser{
+            Id:       itemUnit.User.Id,
+            Username: itemUnit.User.Username,
+            Email:    itemUnit.User.Email,
+        }
+        itemUnit.User = (*models.User)(unsafe.Pointer(simpleUser))
+    }
     
     return itemUnit, err
 }

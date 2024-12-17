@@ -29,9 +29,14 @@ func (s *WarehouseService) GetByID(id uint) (*models.Warehouse, error) {
     if err == orm.ErrNoRows {
         return nil, errors.New("warehouse not found")
     }
+    
+    _, err = s.ormer.LoadRelated(warehouse, "Users")
+    if err != nil {
+        return nil, err
+    }
+    
     return warehouse, err
 }
-
 // GetByName retrieves warehouse by name
 func (s *WarehouseService) GetByName(name string) (*models.Warehouse, error) {
     warehouse := &models.Warehouse{WhName: name}
@@ -67,7 +72,6 @@ func (s *WarehouseService) List(page, pageSize int, whName, whAddress string) ([
     
     qs := s.ormer.QueryTable(new(models.Warehouse))
     
-    // Apply filters if provided
     if whName != "" {
         qs = qs.Filter("wh_name__icontains", whName)
     }
@@ -81,7 +85,19 @@ func (s *WarehouseService) List(page, pageSize int, whName, whAddress string) ([
     }
     
     _, err = qs.Offset(offset).Limit(pageSize).All(&warehouses)
-    return warehouses, total, err
+    if err != nil {
+        return nil, 0, err
+    }
+    
+    // Load related users for each warehouse
+    for _, warehouse := range warehouses {
+        _, err = s.ormer.LoadRelated(warehouse, "Users")
+        if err != nil {
+            return nil, 0, err
+        }
+    }
+    
+    return warehouses, total, nil
 }
 
 // GetWarehouseUsers retrieves all users associated with a warehouse
