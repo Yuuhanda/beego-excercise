@@ -4,6 +4,11 @@ import (
     "errors"
     "github.com/beego/beego/v2/client/orm"
     "myproject/models"
+    "github.com/google/uuid"
+    "mime/multipart"
+    "path/filepath"
+    "os"
+    "io"
 )
 
 type LendingService struct {
@@ -524,4 +529,48 @@ func (s *LendingService) SearchUnitReport(page, pageSize int, filters map[string
     }
 
     return result, num, nil
+}
+
+func (s *LendingService) UploadLoanPicture(file multipart.File, header *multipart.FileHeader) (string, error) {
+    uploadDir := "static/uploads/lending"
+    if err := os.MkdirAll(uploadDir, 0755); err != nil {
+        return "", err
+    }
+
+    filename := uuid.New().String() + filepath.Ext(header.Filename)
+    filepath := filepath.Join(uploadDir, filename)
+
+    dst, err := os.Create(filepath)
+    if err != nil {
+        return "", err
+    }
+    defer dst.Close()
+
+    if _, err := io.Copy(dst, file); err != nil {
+        return "", err
+    }
+
+    return filename, nil
+}
+
+func (s *LendingService) UploadReturnPicture(file multipart.File, header *multipart.FileHeader) (string, error) {
+    uploadDir := "static/uploads/lending/return"
+    if err := os.MkdirAll(uploadDir, 0755); err != nil {
+        return "", err
+    }
+
+    filename := uuid.New().String() + filepath.Ext(header.Filename)
+    filepath := filepath.Join(uploadDir, filename)
+
+    dst, err := os.Create(filepath)
+    if err != nil {
+        return "", err
+    }
+    defer dst.Close()
+
+    if _, err := io.Copy(dst, file); err != nil {
+        return "", err
+    }
+
+    return filename, nil
 }

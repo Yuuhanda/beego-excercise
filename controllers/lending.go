@@ -27,52 +27,68 @@ func (c *LendingController) Prepare() {
     c.warehouseService = services.NewWarehouseService()
 }
 
-// Create handles POST request to create new lending
 func (c *LendingController) Create() {
-    body := c.Ctx.Input.CopyBody(1048576)
-    
-    var input struct {
-        IdUnit     int    `json:"id_unit"`
-        IdUser     int    `json:"user_id"`
-        IdEmployee int    `json:"id_employee"`
-        PicLoan    string `json:"pic_loan"`
-    }
-
-    if err := json.Unmarshal(body, &input); err != nil {
+    // Handle file upload
+    file, header, err := c.GetFile("pic_loan")
+    if err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
-            "message": "Invalid form data",
-            "error":   err.Error(),
-            "received": string(body),
+            "message": "Failed to get uploaded file",
+        }
+        c.ServeJSON()
+        return
+    }
+    defer file.Close()
+
+    filename, err := c.lendingService.UploadLoanPicture(file, header)
+    if err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Failed to upload loan picture",
         }
         c.ServeJSON()
         return
     }
 
+    // Get form values
+    input := struct {
+        IdUnit     uint
+        IdUser     int
+        IdEmployee uint
+        Type       uint
+    }{}
+
+    unitId, _ := c.GetInt("id_unit")
+    userId, _ := c.GetInt("user_id")
+    employeeId, _ := c.GetInt("id_employee")
+    typeId, _ := c.GetInt("type")
+
+    input.IdUnit = uint(unitId)
+    input.IdUser = userId
+    input.IdEmployee = uint(employeeId)
+    input.Type = uint(typeId)
+
+
+
     lending := &models.Lending{
-        IdUnit:     &models.ItemUnit{IdUnit: uint(input.IdUnit)},
+        IdUnit:     &models.ItemUnit{IdUnit: input.IdUnit},
         IdUser:     &models.User{Id: input.IdUser},
-        IdEmployee: &models.Employee{IdEmployee: uint(input.IdEmployee)},
-        Type:       &models.LendingTypeLookup{IdType: 2},
+        IdEmployee: &models.Employee{IdEmployee: input.IdEmployee},
+        Type:       &models.LendingTypeLookup{IdType: input.Type},
         Date:       time.Now(),
-        PicLoan:    input.PicLoan,
+        PicLoan:    filename,
     }
 
     if err := c.lendingService.Create(lending); err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
-            "message": "Failed to create lending",
-            "error":   err.Error(),
+            "message": "Failed to create lending record",
         }
-    } else {
-        c.Data["json"] = map[string]interface{}{
-            "success": true,
-            "message": "Lending created successfully",
-            "data":    lending,
-        }
+        c.ServeJSON()
+        return
     }
 
-    //get username that created the item unit
+    // Get username
     user, err := c.userService.GetByID(input.IdUser)
     if err != nil {
         logs.Error("Failed to get user: %v", err)
@@ -83,8 +99,8 @@ func (c *LendingController) Create() {
         return
     }
 
-    //get serial number
-    itemUnit, err := c.itemUnitService.Get(input.IdUnit)
+    // Get item unit
+    itemUnit, err := c.itemUnitService.Get(int(input.IdUnit))
     if err != nil {
         logs.Error("Failed to get item unit: %v", err)
         c.Data["json"] = map[string]interface{}{
@@ -94,56 +110,42 @@ func (c *LendingController) Create() {
         return
     }
 
-    //get employee name
-    employee, err := c.employeeService.GetByID(uint(input.IdEmployee))
+    // Get employee
+    employee, err := c.employeeService.GetByID(input.IdEmployee)
     if err != nil {
         logs.Error("Failed to get employee: %v", err)
         c.Data["json"] = map[string]interface{}{
             "error": "Failed to get employee",
         }
         c.ServeJSON()
+        return
     }
 
     // Create UnitLog
     unitLogService := services.NewUnitLogService()
-
     unitLog := &models.UnitLog{
         IdUnit:       &models.ItemUnit{IdUnit: itemUnit.IdUnit},
         Content:      "Unit lent out",
-        ActorsAction: "Unit "+ itemUnit.SerialNumber +" lent out "+ employee.EmpName+ " by " + user.Username,
+        ActorsAction: "Unit " + itemUnit.SerialNumber + " lent out " + employee.EmpName + " by " + user.Username,
         UpdateAt:     time.Now(),
     }
 
-
-    err = unitLogService.Create(unitLog)
-    if err != nil {
-        // Handle error case
+    if err = unitLogService.Create(unitLog); err != nil {
         logs.Error("Failed to create unit log: %v", err)
     }
 
+    // Update item unit status
     itemUnitService := services.NewItemUnitService()
-    // Get existing item unit data first
-    existingItemUnit, err := itemUnitService.Get(input.IdUnit)
-    if err != nil {
-        logs.Error("Failed to get existing item unit: %v", err)
-        c.Data["json"] = map[string]interface{}{
-            "error": "Failed to get existing item unit",
-        }
-        c.ServeJSON()
-        return
-    }
-    
-    itemUnit = &models.ItemUnit{
-        IdUnit:       uint(input.IdUnit),
-        Comment:      existingItemUnit.Comment,
+    updatedItemUnit := &models.ItemUnit{
+        IdUnit:       input.IdUnit,
+        Comment:      itemUnit.Comment,
         StatusLookup: &models.StatusLookup{IdStatus: uint(2)},
-        Warehouse:    &models.Warehouse{IdWh: uint(existingItemUnit.Warehouse.IdWh)},
-        CondLookup:   &models.ConditionLookup{IdCondition: uint(existingItemUnit.CondLookup.IdCondition)},
-        User:         &models.User{Id: existingItemUnit.User.Id},
+        Warehouse:    &models.Warehouse{IdWh: itemUnit.Warehouse.IdWh},
+        CondLookup:   &models.ConditionLookup{IdCondition: itemUnit.CondLookup.IdCondition},
+        User:         &models.User{Id: itemUnit.User.Id},
     }
 
-    err = itemUnitService.Update(itemUnit)
-    if err != nil {
+    if err = itemUnitService.Update(updatedItemUnit); err != nil {
         logs.Error("Failed to update item unit: %v", err)
         c.Data["json"] = map[string]interface{}{
             "error": "Failed to update item unit",
@@ -152,7 +154,11 @@ func (c *LendingController) Create() {
         return
     }
 
-
+    c.Data["json"] = map[string]interface{}{
+        "success": true,
+        "message": "Lending created successfully",
+        "data":    lending,
+    }
     c.ServeJSON()
 }
 
@@ -440,6 +446,28 @@ func (c *LendingController) SearchUnitReport() {
 
 
 func (c *LendingController) Return() {
+    // Handle file upload first
+    file, header, err := c.GetFile("pic_return")
+    if err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Failed to get uploaded file",
+        }
+        c.ServeJSON()
+        return
+    }
+    defer file.Close()
+
+    filename, err := c.lendingService.UploadReturnPicture(file, header)
+    if err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Failed to upload return picture",
+        }
+        c.ServeJSON()
+        return
+    }
+
     lendingIdStr := c.Ctx.Input.Param(":id")
     lendingId, err := strconv.ParseUint(lendingIdStr, 10, 32)
     if err != nil {
@@ -451,7 +479,7 @@ func (c *LendingController) Return() {
         return
     }
 
-    // First get existing lending data
+    // Get existing lending data
     existingLending, err := c.lendingService.GetByID(uint(lendingId))
     if err != nil {
         c.Data["json"] = map[string]interface{}{
@@ -463,38 +491,35 @@ func (c *LendingController) Return() {
         return
     }
 
-    body := c.Ctx.Input.CopyBody(1048576)
+    var IdEmployee uint
+    // Get form values
+    input := struct {
+        UserId     int
+        Condition  int
+        Comment    string
+        IdWh       int
+    }{}
+
+    userId, _ := c.GetInt("user_id")
+    condition, _ := c.GetInt("condition")
+    warehouseId, _ := c.GetInt("IdWh")
+
+    input.UserId = userId
     
-    var input struct {
-        UserId     int    `json:"user_id"`
-        IdEmployee int    `json:"id_employee"`
-        PicReturn  string `json:"pic_return"`
-        Condition int `json:"condition"`
-        Comment string `json:"comment"`
-        IdWh int    `json:"IdWh"`
-    }
-
-    if err := json.Unmarshal(body, &input); err != nil {
-        c.Data["json"] = map[string]interface{}{
-            "success": false,
-            "message": "Invalid request body",
-            "error":   err.Error(),
-            "received": string(body),
-        }
-        c.ServeJSON()
-        return
-    }
-
+    input.Condition = condition
+    input.Comment = c.GetString("comment")
+    input.IdWh = warehouseId
     lending := &models.Lending{
         IdLending:  uint(lendingId),
-        IdUnit:     existingLending.IdUnit, // Preserve existing IdUnit
-        IdUser:     &models.User{Id: input.UserId},
-        IdEmployee: &models.Employee{IdEmployee: uint(input.IdEmployee)},
+        IdUnit:     existingLending.IdUnit,
+        IdUser:     &models.User{Id: userId},
+        IdEmployee: existingLending.IdEmployee,
         Type:       &models.LendingTypeLookup{IdType: 2},
         Date:       time.Now(),
-        PicLoan: existingLending.PicLoan,
-        PicReturn:  input.PicReturn,
+        PicLoan:    existingLending.PicLoan,
+        PicReturn:  filename,
     }
+    IdEmployee = existingLending.IdEmployee.IdEmployee
 
     if err := c.lendingService.Update(lending); err != nil {
         c.Data["json"] = map[string]interface{}{
@@ -533,7 +558,7 @@ func (c *LendingController) Return() {
     }
 
     //get employee name
-    employee, err := c.employeeService.GetByID(uint(input.IdEmployee))
+    employee, err := c.employeeService.GetByID(uint(IdEmployee))
     if err != nil {
         logs.Error("Failed to get employee: %v", err)
         c.Data["json"] = map[string]interface{}{
@@ -559,7 +584,7 @@ func (c *LendingController) Return() {
     unitLog := &models.UnitLog{
         IdUnit:       &models.ItemUnit{IdUnit: itemUnit.IdUnit},
         Content:      input.Comment,
-        ActorsAction: "Unit "+ itemUnit.SerialNumber +" lent out to "+ employee.EmpName+" returned to"+ warehouse.WhName +" by " + user.Username,
+        ActorsAction: "Unit "+ itemUnit.SerialNumber +" lent out to "+ employee.EmpName+" returned to "+ warehouse.WhName +" by " + user.Username,
         UpdateAt:     time.Now(),
     }
 
@@ -592,5 +617,4 @@ func (c *LendingController) Return() {
 
     c.ServeJSON()
 }
-
 
