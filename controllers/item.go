@@ -7,6 +7,7 @@ import (
     "fmt"
     "strconv"
     "encoding/json"
+    "path/filepath" 
 )
 
 type ItemController struct {
@@ -335,3 +336,27 @@ func (c *ItemController) SearchDashboard() {
 
 
 
+
+// GetItemImage serves the item's image file
+// @router /item/:id/image [get]
+//can be used <img src="http://your-api-domain/item/123/image" alt="Item Image">
+//and const imageUrl = `http://your-api-domain/item/${itemId}/image`;
+func (c *ItemController) GetItemImage() {
+    idStr := c.Ctx.Input.Param(":id")
+    var id uint
+    if _, err := fmt.Sscanf(idStr, "%d", &id); err != nil {
+        c.Ctx.Output.Status = 400
+        c.Ctx.Output.Body([]byte("Invalid item ID"))
+        return
+    }
+
+    item, err := c.itemService.GetByID(id)
+    if err != nil {
+        c.Ctx.Output.Status = 404
+        c.Ctx.Output.Body([]byte("Item not found"))
+        return
+    }
+
+    imagePath := filepath.Join("static/uploads/items", item.Imagefile)
+    c.Ctx.Output.Download(imagePath, item.Imagefile)
+}

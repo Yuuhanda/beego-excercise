@@ -35,7 +35,7 @@ func InitRoutes() {
     beego.Router("/api/item/:id", &controllers.ItemController{}, "get:GetItem;put:UpdateItem;delete:DeleteItem")
     beego.Router("/api/items", &controllers.ItemController{}, "get:ListItems")
     beego.Router("/api/items/dashboard", &controllers.ItemController{}, "get:SearchDashboard")
-
+    beego.Router("/api/item/:id/image", &controllers.ItemController{}, "get:GetItemImage")
 
     // Item Category Routes
     categoryCtrl := controllers.NewItemCategoryController()
