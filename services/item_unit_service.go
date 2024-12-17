@@ -29,15 +29,29 @@ type SimpleUser struct {
     Email    string `json:"Email"`
 }
 
+func (s *ItemUnitService) IsSerialNumberUnique(serialNumber string) bool {
+    exist := models.ItemUnit{SerialNumber: serialNumber}
+    err := s.ormer.Read(&exist, "SerialNumber")
+    return err == orm.ErrNoRows
+}
+
 // Create creates a new item unit
-func (s *ItemUnitService) Create(itemUnit *models.ItemUnit) error {
+func (s *ItemUnitService) Create(itemUnit *models.ItemUnit) (string, error) {
     o := orm.NewOrm()
     
-    // Insert the new item unit
-    _, err := o.Insert(itemUnit)
-    if err != nil {
-        return err
+    // Check if serial number is unique
+    if !s.IsSerialNumberUnique(itemUnit.SerialNumber) {
+        return "Serial number already exists", errors.New("duplicate serial number")
     }
+    
+    // Insert and get the new ID
+    id, err := o.Insert(itemUnit)
+    if err != nil {
+        return "Failed to create item unit", err
+    }
+    
+    // Set the ID in the itemUnit object
+    itemUnit.IdUnit = uint(id)
     
     // Load all related data
     o.LoadRelated(itemUnit, "Item")
@@ -59,7 +73,7 @@ func (s *ItemUnitService) Create(itemUnit *models.ItemUnit) error {
         }
     }
 
-    return nil
+    return "Item unit created successfully", nil
 }
 
 

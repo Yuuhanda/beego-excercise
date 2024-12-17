@@ -6,6 +6,7 @@ import (
     "myproject/services"
     "strconv"
     "github.com/beego/beego/v2/server/web"
+    
 )
 
 type ItemCategoryController struct {
@@ -45,20 +46,20 @@ func (c *ItemCategoryController) Create() {
         CategoryName: input.CategoryName,
         CatCode:     input.CatCode,
     }
-
     service := services.NewItemCategoryService()
-    if err := service.Create(category); err != nil {
+    msg, err := service.Create(category)
+    if err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
-            "message": "Failed to create category",
-            "error":   err.Error(),
+            "message": err.Error(),
         }
-    } else {
-        c.Data["json"] = map[string]interface{}{
-            "success": true,
-            "message": "Category created successfully",
-            "data":    category,
-        }
+        c.ServeJSON()
+        return
+    }
+
+    c.Data["json"] = map[string]interface{}{
+        "success": true,
+        "message": msg,
     }
     c.ServeJSON()
 }

@@ -4,6 +4,7 @@ import (
     "errors"
     "github.com/beego/beego/v2/client/orm"
     "myproject/models"
+    "fmt"
 )
 
 type WarehouseService struct {
@@ -18,9 +19,20 @@ func NewWarehouseService() *WarehouseService {
 
 // Create creates a new warehouse
 func (s *WarehouseService) Create(warehouse *models.Warehouse) error {
-    _, err := s.ormer.Insert(warehouse)
+    // Check if warehouse with same name exists
+    existing := &models.Warehouse{WhName: warehouse.WhName}
+    err := s.ormer.Read(existing, "WhName")
+    if err == nil {
+        return fmt.Errorf("failed to create warehouse: name '%s' already exists", warehouse.WhName)
+    }
+    if err != orm.ErrNoRows {
+        return err
+    }
+    
+    _, err = s.ormer.Insert(warehouse)
     return err
 }
+
 
 // GetByID retrieves warehouse by ID
 func (s *WarehouseService) GetByID(id uint) (*models.Warehouse, error) {

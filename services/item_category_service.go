@@ -4,6 +4,7 @@ import (
     "errors"
     "github.com/beego/beego/v2/client/orm"
     "myproject/models"
+    "fmt"
 )
 
 type ItemCategoryService struct {
@@ -17,11 +18,26 @@ func NewItemCategoryService() *ItemCategoryService {
 }
 
 // Create creates a new item category
-func (s *ItemCategoryService) Create(category *models.ItemCategory) error {
-    o := orm.NewOrm()
-    _, err := o.Insert(category)
-    return err
+func (s *ItemCategoryService) Create(category *models.ItemCategory) (string, error) {
+    // Check if category with same code exists
+    existing := &models.ItemCategory{CatCode: category.CatCode}
+    err := s.ormer.Read(existing, "CatCode")
+    if err == nil {
+        return "", fmt.Errorf("failed to create category: code %s already exists", category.CatCode)
+    }
+    if err != orm.ErrNoRows {
+        return "", err
+    }
+    
+    _, err = s.ormer.Insert(category)
+    if err != nil {
+        return "", err
+    }
+    
+    return fmt.Sprintf("category %s created successfully", category.CatCode), nil
 }
+
+
 
 
 

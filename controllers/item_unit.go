@@ -90,25 +90,26 @@ func (c *ItemUnitController) Create() {
         User:         &models.User{Id: input.UpdatedBy},
     }
 
-    if err := c.itemUnitService.Create(itemUnit); err != nil {
+    message, err := c.itemUnitService.Create(itemUnit)
+    if err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
-            "message": "Failed to create item unit",
+            "message": message,
             "error":   err.Error(),
         }
-    } else {
-        c.Data["json"] = map[string]interface{}{
-            "success": true,
-            "message": "Item unit created successfully",
-            "data":    itemUnit,
-        }
+        c.ServeJSON()
+        return
     }
-    
+
+    // Successful creation, proceed with user and warehouse lookup
     user, err := c.userService.GetByID(input.UpdatedBy)
     if err != nil {
         logs.Error("Failed to get user: %v", err)
         c.Data["json"] = map[string]interface{}{
-            "error": "Failed to get user",
+            "success": true,
+            "message": message,
+            "data": itemUnit,
+            "warning": "Failed to create unit log: user not found",
         }
         c.ServeJSON()
         return
@@ -118,27 +119,40 @@ func (c *ItemUnitController) Create() {
     if err != nil {
         logs.Error("Failed to get warehouse: %v", err)
         c.Data["json"] = map[string]interface{}{
-            "error": "Failed to get warehouse",
+            "success": true,
+            "message": message,
+            "data": itemUnit,
+            "warning": "Failed to create unit log: warehouse not found",
         }
         c.ServeJSON()
         return
     }
 
     unitLogService := services.NewUnitLogService()
-
     unitLog := &models.UnitLog{
-        IdUnit:       &models.ItemUnit{IdUnit: itemUnit.IdUnit},
+        IdUnit:       itemUnit,
         Content:      input.Comment,
-        ActorsAction: "New Unit "+ input.SerialNumber +" added by " + user.Username + " into " + warehouse.WhName,
+        ActorsAction: "New Unit " + itemUnit.SerialNumber + " added by " + user.Username + " into " + warehouse.WhName,
         UpdateAt:     time.Now(),
     }
 
-    err = unitLogService.Create(unitLog)
-    if err != nil {
+    if err = unitLogService.Create(unitLog); err != nil {
         logs.Error("Failed to create unit log: %v", err)
+        c.Data["json"] = map[string]interface{}{
+            "success": true,
+            "message": message,
+            "data": itemUnit,
+            "warning": "Failed to create unit log",
+        }
+        c.ServeJSON()
+        return
     }
 
-    c.Data["json"] = itemUnit
+    c.Data["json"] = map[string]interface{}{
+        "success": true,
+        "message": message,
+        "data": itemUnit,
+    }
     c.ServeJSON()
 }
 
