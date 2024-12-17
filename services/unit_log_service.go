@@ -45,6 +45,15 @@ func (s *UnitLogService) Create(unitLog *models.UnitLog) error {
         o.LoadRelated(unitLog.IdUnit.Item, "Category")
     }
 
+    // Create simplified User data
+    if unitLog.IdUnit.User != nil {
+        unitLog.IdUnit.User = &models.User{
+            Id:       unitLog.IdUnit.User.Id,
+            Username: unitLog.IdUnit.User.Username,
+            Email:    unitLog.IdUnit.User.Email,
+        }
+    }
+
     return nil
 }
 
@@ -134,6 +143,15 @@ func (s *UnitLogService) List(page, pageSize int, filters map[string]string) ([]
 
             if unitLog.IdUnit.Item != nil {
                 o.LoadRelated(unitLog.IdUnit.Item, "Category")
+            }
+            
+            // Create simplified User data
+            if unitLog.IdUnit.User != nil {
+                unitLog.IdUnit.User = &models.User{
+                    Id:       unitLog.IdUnit.User.Id,
+                    Username: unitLog.IdUnit.User.Username,
+                    Email:    unitLog.IdUnit.User.Email,
+                }
             }
         }
     }

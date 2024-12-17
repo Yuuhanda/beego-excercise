@@ -51,6 +51,15 @@ func (s *RepairLogService) Create(repairLog *models.RepairLog) error {
         o.LoadRelated(repairLog.IdUnit.Item, "Category")
     }
 
+    // Create simplified User data
+    if repairLog.IdUnit.User != nil {
+        repairLog.IdUnit.User = &models.User{
+            Id:       repairLog.IdUnit.User.Id,
+            Username: repairLog.IdUnit.User.Username,
+            Email:    repairLog.IdUnit.User.Email,
+        }
+    }
+    
     return nil
 }
 
@@ -111,6 +120,15 @@ func (s *RepairLogService) Update(repairLog *models.RepairLog) error {
 
     if existing.IdUnit.Item != nil {
         o.LoadRelated(existing.IdUnit.Item, "Category")
+    }
+
+    // Create simplified User data
+    if existing.IdUnit.User != nil {
+        existing.IdUnit.User = &models.User{
+            Id:       existing.IdUnit.User.Id,
+            Username: existing.IdUnit.User.Username,
+            Email:    existing.IdUnit.User.Email,
+        }
     }
 
     *repairLog = *existing
@@ -183,6 +201,14 @@ func (s *RepairLogService) List(page, pageSize int, filters map[string]string) (
 
             if log.IdUnit.Item != nil {
                 o.LoadRelated(log.IdUnit.Item, "Category")
+            }
+
+            if log.IdUnit.User != nil {
+                log.IdUnit.User = &models.User{
+                    Id:       log.IdUnit.User.Id,
+                    Username: log.IdUnit.User.Username,
+                    Email:    log.IdUnit.User.Email,
+                }
             }
         }
     }

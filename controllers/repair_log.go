@@ -173,6 +173,14 @@ func (c *RepairLogController) Get() {
         if repairLog.IdUnit.Item != nil {
             o.LoadRelated(repairLog.IdUnit.Item, "Category")
         }
+
+        if repairLog.IdUnit.User != nil {
+            repairLog.IdUnit.User = &models.User{
+                Id:       repairLog.IdUnit.User.Id,
+                Username: repairLog.IdUnit.User.Username,
+                Email:    repairLog.IdUnit.User.Email,
+            }
+        }
     }
 
     c.Data["json"] = map[string]interface{}{

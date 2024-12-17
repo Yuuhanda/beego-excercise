@@ -103,6 +103,15 @@ func (c *UnitLogController) Get() {
         if unitLog.IdUnit.Item != nil {
             o.LoadRelated(unitLog.IdUnit.Item, "Category")
         }
+
+        // Create simplified User data
+        if unitLog.IdUnit.User != nil {
+            unitLog.IdUnit.User = &models.User{
+                Id:       unitLog.IdUnit.User.Id,
+                Username: unitLog.IdUnit.User.Username,
+                Email:    unitLog.IdUnit.User.Email,
+            }
+        }
     }
 
     c.Data["json"] = map[string]interface{}{
@@ -142,6 +151,15 @@ func (c *UnitLogController) GetByUnit() {
 
             if unitLog.IdUnit.Item != nil {
                 o.LoadRelated(unitLog.IdUnit.Item, "Category")
+            }
+
+            // Create simplified User data
+            if unitLog.IdUnit.User != nil {
+                unitLog.IdUnit.User = &models.User{
+                    Id:       unitLog.IdUnit.User.Id,
+                    Username: unitLog.IdUnit.User.Username,
+                    Email:    unitLog.IdUnit.User.Email,
+                }
             }
         }
     }

@@ -48,9 +48,13 @@ func (s *DocUploadedService) GetByID(id int) (*models.DocUploaded, error) {
         return nil, err
     }
 
-    // Load related user data
+    // Limit User data to specified fields
     if doc.UserId != nil {
-        o.LoadRelated(doc, "UserId")
+        doc.UserId = &models.User{
+            Id:       doc.UserId.Id,
+            Username: doc.UserId.Username,
+            Email:    doc.UserId.Email,
+        }
     }
 
     return doc, nil
@@ -91,9 +95,19 @@ func (s *DocUploadedService) List(page, pageSize int, filters map[string]string)
         return nil, 0, err
     }
 
+    // Limit User data for each document
+    for _, doc := range docs {
+        if doc.UserId != nil {
+            doc.UserId = &models.User{
+                Id:       doc.UserId.Id,
+                Username: doc.UserId.Username,
+                Email:    doc.UserId.Email,
+            }
+        }
+    }
+
     return docs, total, nil
 }
-
 func (s *DocUploadedService) Delete(id int) error {
     o := orm.NewOrm()
     doc := &models.DocUploaded{IdDoc: id}

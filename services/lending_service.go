@@ -39,6 +39,15 @@ func (s *LendingService) Create(lending *models.Lending) error {
         if lending.IdUnit.Item != nil {
             o.LoadRelated(lending.IdUnit.Item, "Category")
         }
+
+        if lending.IdUnit.User != nil {
+            lending.IdUnit.User = &models.User{
+                Id:       lending.IdUser.Id,
+                Username: lending.IdUser.Username,
+                Email:    lending.IdUser.Email,
+            }
+        }
+
     }
     
     if lending.IdUser != nil {
@@ -58,7 +67,6 @@ func (s *LendingService) Create(lending *models.Lending) error {
         o.Read(lendType)
         lending.Type = lendType
     }
-    
     return nil
 }
 
@@ -82,10 +90,31 @@ func (s *LendingService) GetByID(id uint) (*models.Lending, error) {
         o.LoadRelated(lending.IdUnit, "StatusLookup")
         o.LoadRelated(lending.IdUnit, "Warehouse")
         o.LoadRelated(lending.IdUnit, "CondLookup")
+        o.LoadRelated(lending.IdUnit, "User")
+        if lending.IdUnit.Item != nil {
+            o.LoadRelated(lending.IdUnit.Item, "Category")
+        }
+    }
+
+    // Create simplified User data
+    if lending.IdUser != nil {
+        lending.IdUser = &models.User{
+            Id:       lending.IdUser.Id,
+            Username: lending.IdUser.Username,
+            Email:    lending.IdUser.Email,
+        }
+    }
+    if lending.IdUnit != nil {
+        lending.IdUnit.User = &models.User{
+            Id:       lending.IdUnit.User.Id,
+            Username: lending.IdUnit.User.Username,
+            Email:    lending.IdUnit.User.Email,
+        }
     }
     
     return lending, nil
 }
+
 
 
 
@@ -171,12 +200,27 @@ func (s *LendingService) List(page, pageSize int, filters map[string]string) ([]
             if lending.IdUnit.Item != nil {
                 o.LoadRelated(lending.IdUnit.Item, "Category")
             }
+
+            // Create simplified User data
+            if lending.IdUnit.User != nil {
+                lending.IdUnit.User = &models.User{
+                    Id:       lending.IdUnit.User.Id,
+                    Username: lending.IdUnit.User.Username,
+                    Email:    lending.IdUnit.User.Email,
+                }
+            }
+
+
         }
         
+        // Simplify IdUser data
         if lending.IdUser != nil {
-            user := &models.User{Id: lending.IdUser.Id}
-            o.Read(user)
-            lending.IdUser = user
+            userData := lending.IdUser
+            lending.IdUser = &models.User{
+                Id:       userData.Id,
+                Username: userData.Username,
+                Email:    userData.Email,
+            }
         }
         
         if lending.IdEmployee != nil {
@@ -243,13 +287,27 @@ func (s *LendingService) GetActiveLoans(filters map[string]string) ([]*models.Le
             if unit.Item != nil {
                 o.LoadRelated(unit.Item, "Category")
             }
+
+            // Create simplified User data
+            if unit.User != nil {
+                unit.User = &models.User{
+                    Id:       unit.User.Id,
+                    Username: unit.User.Username,
+                    Email:    unit.User.Email,
+                }
+            }
+
             lending.IdUnit = unit
         }
-        
+        o.LoadRelated(lending, "IdUser")
+        // Simplify IdUser data
         if lending.IdUser != nil {
-            user := &models.User{Id: lending.IdUser.Id}
-            o.Read(user)
-            lending.IdUser = user
+            userData := lending.IdUser
+            lending.IdUser = &models.User{
+                Id:       userData.Id,
+                Username: userData.Username,
+                Email:    userData.Email,
+            }
         }
         
         if lending.IdEmployee != nil {
@@ -312,13 +370,27 @@ func (s *LendingService) GetReturnedLoans(filters map[string]string) ([]*models.
             if unit.Item != nil {
                 o.LoadRelated(unit.Item, "Category")
             }
+
+            // Create simplified User data
+            if unit.User != nil {
+                unit.User = &models.User{
+                    Id:       unit.User.Id,
+                    Username: unit.User.Username,
+                    Email:    unit.User.Email,
+                }
+            }
+
             lending.IdUnit = unit
         }
-        
+        o.LoadRelated(lending, "IdUser")
+        // Simplify IdUser data
         if lending.IdUser != nil {
-            user := &models.User{Id: lending.IdUser.Id}
-            o.Read(user)
-            lending.IdUser = user
+            userData := lending.IdUser
+            lending.IdUser = &models.User{
+                Id:       userData.Id,
+                Username: userData.Username,
+                Email:    userData.Email,
+            }
         }
         
         if lending.IdEmployee != nil {

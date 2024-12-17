@@ -190,7 +190,13 @@ func (c *ItemUnitController) Get() {
     o.LoadRelated(itemUnit, "CondLookup")
     o.LoadRelated(itemUnit, "User")
 
-    
+    if itemUnit.User != nil {
+        itemUnit.User = &models.User{
+            Id:       itemUnit.User.Id,
+            Username: itemUnit.User.Username,
+            Email:    itemUnit.User.Email,
+        }
+    }
     c.Data["json"] = itemUnit
     c.ServeJSON()
 }
@@ -444,6 +450,14 @@ func (c *ItemUnitController) GetBySerialNumber() {
     o.LoadRelated(itemUnit, "CondLookup")
     o.LoadRelated(itemUnit, "User")
     
+    if itemUnit.User != nil {
+        itemUnit.User = &models.User{
+            Id:       itemUnit.User.Id,
+            Username: itemUnit.User.Username,
+            Email:    itemUnit.User.Email,
+        }
+    }
+    
     c.Data["json"] = itemUnit
     c.ServeJSON()
 }
@@ -488,6 +502,15 @@ func (c *ItemUnitController) GetByWarehouse() {
         o.LoadRelated(item, "Warehouse")
         o.LoadRelated(item, "CondLookup")
         o.LoadRelated(item, "User")
+
+        if item.User != nil {
+            item.User = &models.User{
+                Id:       item.User.Id,
+                Username: item.User.Username,
+                Email:    item.User.Email,
+            }
+        }
+
     }
     
     c.Data["json"] = items

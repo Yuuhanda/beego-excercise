@@ -9,6 +9,7 @@ import (
     "fmt"
     "strings"
     "strconv"
+    "unsafe"
 )
 
 type ItemUnitService struct {
@@ -20,6 +21,12 @@ func NewItemUnitService() *ItemUnitService {
     return &ItemUnitService{
         ormer: database.GetOrmer(), // Use the database package to get the ORMer instance
     }
+}
+
+type SimpleUser struct {
+    Id       int    `json:"Id"`
+    Username string `json:"Username"`
+    Email    string `json:"Email"`
 }
 
 // Create creates a new item unit
@@ -43,6 +50,15 @@ func (s *ItemUnitService) Create(itemUnit *models.ItemUnit) error {
         o.LoadRelated(itemUnit.Item, "Category")
     }
 
+    // Create simplified User data
+    if itemUnit.User != nil {
+        itemUnit.User = &models.User{
+            Id:       itemUnit.User.Id,
+            Username: itemUnit.User.Username,
+            Email:    itemUnit.User.Email,
+        }
+    }
+
     return nil
 }
 
@@ -53,10 +69,6 @@ func (s *ItemUnitService) Get(id int) (*models.ItemUnit, error) {
         s.ormer = orm.NewOrm()
     }
     
-    if id <= 0 {
-        return nil, errors.New("invalid item unit ID")
-    }
-
     itemUnit := &models.ItemUnit{IdUnit: uint(id)}
     err := s.ormer.Read(itemUnit)
     
@@ -69,13 +81,27 @@ func (s *ItemUnitService) Get(id int) (*models.ItemUnit, error) {
     }
     
     s.ormer.LoadRelated(itemUnit, "Item")
+    if itemUnit.Item != nil {
+        s.ormer.LoadRelated(itemUnit.Item, "Category")
+    }
     s.ormer.LoadRelated(itemUnit, "StatusLookup")
     s.ormer.LoadRelated(itemUnit, "Warehouse")
     s.ormer.LoadRelated(itemUnit, "CondLookup")
     s.ormer.LoadRelated(itemUnit, "User")
     
+    // Convert to SimpleUser
+    if itemUnit.User != nil {
+        simpleUser := &SimpleUser{
+            Id:       itemUnit.User.Id,
+            Username: itemUnit.User.Username,
+            Email:    itemUnit.User.Email,
+        }
+        itemUnit.User = (*models.User)(unsafe.Pointer(simpleUser))
+    }
+    
     return itemUnit, nil
 }
+
 
 
 func (s *ItemUnitService) GetBySerialNumber(serialNumber string) (*models.ItemUnit, error) {
@@ -216,6 +242,9 @@ func (s *ItemUnitService) List(page, pageSize int, filters map[string]interface{
         if userId, ok := filters["userId"].(uint); ok && userId > 0 {
             qs = qs.Filter("updated_by", userId)
         }
+        if userId, ok := filters["category"].(uint); ok && userId > 0 {
+            qs = qs.Filter("item__category__id_category", userId)
+        }
     }
     
     total, _ := qs.Count()
@@ -228,6 +257,18 @@ func (s *ItemUnitService) List(page, pageSize int, filters map[string]interface{
             o.LoadRelated(item, "StatusLookup")
             o.LoadRelated(item, "CondLookup")
             o.LoadRelated(item, "User")
+            if item.Item != nil {
+                o.LoadRelated(item.Item, "Category")
+            }
+
+            // Create simplified User data
+            if item.User != nil {
+                item.User = &models.User{
+                    Id:       item.User.Id,
+                    Username: item.User.Username,
+                    Email:    item.User.Email,
+                }
+            }
         }
     }
     
