@@ -5,6 +5,11 @@ import (
     "myproject/models"
     "time"
     "fmt"
+    "github.com/google/uuid"
+    "mime/multipart"
+    "path/filepath"
+    "os"
+    "io"
 )
 
 type ItemService struct {
@@ -201,4 +206,28 @@ func (s *ItemService) GenerateSKU(item *models.Item) error {
     
     return nil
 }
+
+func (s *ItemService) UploadImage(file multipart.File, handler *multipart.FileHeader) (string, error) {
+    uploadDir := "static/uploads/items"
+    if err := os.MkdirAll(uploadDir, 0755); err != nil {
+        return "", err
+    }
+
+    // Generate unique filename while preserving extension
+    filename := uuid.New().String() + filepath.Ext(handler.Filename)
+    filepath := filepath.Join(uploadDir, filename)
+
+    dst, err := os.Create(filepath)
+    if err != nil {
+        return "", err
+    }
+    defer dst.Close()
+
+    if _, err := io.Copy(dst, file); err != nil {
+        return "", err
+    }
+
+    return filename, nil
+}
+
 

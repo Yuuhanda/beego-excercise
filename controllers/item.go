@@ -22,56 +22,60 @@ func (c *ItemController) Prepare() {
 
 // CreateItem handles item creation
 // @router /item [post]
-
 func (c *ItemController) CreateItem() {
-    // Read the request body
-    body := c.Ctx.Input.CopyBody(1048576)
-    
-    var input struct {
-        ItemName    string `json:"ItemName"`
-        SKU         string `json:"SKU"`
-        Imagefile   string `json:"Imagefile"`
-        CategoryId  uint   `json:"CategoryId"` // Changed to uint to match model
-    }
+    // Get form values directly
+    itemName := c.GetString("ItemName")
+    sku := c.GetString("SKU")
+    categoryId, _ := c.GetInt("CategoryId")
 
-    if err := json.Unmarshal(body, &input); err != nil {
+    // Handle file upload
+    file, header, err := c.GetFile("imagefile")
+    if err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
-            "message": "Invalid form data",
-            "error":   err.Error(),
-            "received": string(body),
+            "message": "Failed to get uploaded file",
+        }
+        c.ServeJSON()
+        return
+    }
+    defer file.Close()
+
+    // Upload the image and get filename
+    filename, err := c.itemService.UploadImage(file, header)
+    if err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Failed to upload image",
         }
         c.ServeJSON()
         return
     }
 
-    // First verify the category exists using itemService
-    category, err := c.itemCategoryService.GetByID(int(input.CategoryId))
+    // Get category
+    category, err := c.itemCategoryService.GetByID(categoryId)
     if err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
             "message": "Invalid category",
-            "error":   err.Error(),
         }
         c.ServeJSON()
         return
     }
 
-    // Create item with verified category
+    // Create item with the uploaded filename
     item := &models.Item{
-        ItemName:  input.ItemName,
-        SKU:       input.SKU,
-        Imagefile: input.Imagefile,
+        ItemName:  itemName,
+        SKU:       sku,
+        Imagefile: filename,
         Category:  category,
     }
 
     // Generate SKU if empty
-    if input.SKU == "" {
+    if sku == "" {
         if err := c.itemService.GenerateSKU(item); err != nil {
             c.Data["json"] = map[string]interface{}{
                 "success": false,
                 "message": "Failed to generate SKU",
-                "error":   err.Error(),
             }
             c.ServeJSON()
             return
@@ -82,7 +86,6 @@ func (c *ItemController) CreateItem() {
         c.Data["json"] = map[string]interface{}{
             "success": false,
             "message": "Failed to create item",
-            "error":   err.Error(),
         }
     } else {
         c.Data["json"] = map[string]interface{}{
@@ -93,8 +96,6 @@ func (c *ItemController) CreateItem() {
     }
     c.ServeJSON()
 }
-
-
 
 // GetItem retrieves item by ID
 // @router /item/:id [get]
@@ -331,3 +332,6 @@ func (c *ItemController) SearchDashboard() {
     }
     c.ServeJSON()
 }
+
+
+
