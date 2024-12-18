@@ -624,8 +624,8 @@ func (c *LendingController) Return() {
 // GetLoanImage serves the lending's loan picture
 // @router /lending/:id/loan-image [get]
 // how to use it
-// const loanImageUrl = `http://your-api-domain/lending/${lendingId}/loan-image`;
-// const returnImageUrl = `http://your-api-domain/lending/${lendingId}/return-image`;
+// const loanImageUrl = `http://your-api-domain/api/lending/${lendingId}/loan-image`;
+// const returnImageUrl = `http://your-api-domain/api/lending/${lendingId}/return-image`;
 
 func (c *LendingController) GetLoanImage() {
     idStr := c.Ctx.Input.Param(":id")

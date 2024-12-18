@@ -65,8 +65,8 @@ func InitRoutes() {
     beego.Router("/api/lendings/report/units", &controllers.LendingController{}, "get:SearchUnitReport")
     beego.Router("/api/lendings/return/:id", &controllers.LendingController{}, "put:Return")
     // Lending images routes
-    beego.Router("/lending/:id/loan-image", &controllers.LendingController{}, "get:GetLoanImage")
-    beego.Router("/lending/:id/return-image", &controllers.LendingController{}, "get:GetReturnImage")
+    beego.Router("/api/lending/:id/loan-image", &controllers.LendingController{}, "get:GetLoanImage")
+    beego.Router("/api/lending/:id/return-image", &controllers.LendingController{}, "get:GetReturnImage")
 
     // Additional lending-specific routes
     beego.Router("/api/lendings/active", lendingCtrl, "get:GetActiveLoans")
@@ -86,6 +86,11 @@ func InitRoutes() {
     // Document Upload Routes
     beego.Router("/api/docs", &controllers.DocUploadedController{}, "post:Create;get:List")
     beego.Router("/api/docs/:id", &controllers.DocUploadedController{}, "get:Get;delete:Delete")
+    // Template download
+    beego.Router("/api/docs/template/download", &controllers.DocUploadedController{}, "get:DownloadTemplate")
+    // Upload Document
+    beego.Router("/api/docs/upload", &controllers.DocUploadedController{}, "post:Upload")
+
 
     // Warehouse Routes
     beego.Router("/api/warehouse", &controllers.WarehouseController{}, "post:CreateWarehouse")
