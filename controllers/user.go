@@ -6,6 +6,9 @@ import (
     "myproject/services"
 	"fmt"
     "golang.org/x/crypto/bcrypt"
+    "time"
+    "encoding/json"
+    "io"
 )
 
 type UserController struct {
@@ -21,38 +24,34 @@ func (c *UserController) Prepare() {
 // @router /user [post]
 func (c *UserController) CreateUser() {
     var userForm struct {
-        Username string `form:"username"`
-        Email    string `form:"email"`
-        Password string `form:"password"` // Raw password from request
+        Username string `json:"username"`
+        Email    string `json:"email"`
+        Password string `json:"password"`
     }
 
-    if err := c.ParseForm(&userForm); err != nil {
+    // Read the raw request body
+    body, _ := io.ReadAll(c.Ctx.Request.Body)
+    
+    if err := json.Unmarshal(body, &userForm); err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
-            "message": "Invalid form data",
+            "message": "Invalid JSON data",
             "error":   err.Error(),
         }
         c.ServeJSON()
         return
     }
 
-    // Hash password before creating user
-    hashedPassword, err := bcrypt.GenerateFromPassword([]byte(userForm.Password), bcrypt.DefaultCost)
-    if err != nil {
-        c.Data["json"] = map[string]interface{}{
-            "success": false,
-            "message": "Password hashing failed",
-            "error":   err.Error(),
-        }
-        c.ServeJSON()
-        return
-    }
+    hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(userForm.Password), bcrypt.DefaultCost)
 
     user := &models.User{
-        Username:     userForm.Username,
-        Email:        userForm.Email,
-        PasswordHash: string(hashedPassword),
-        Status:       1,
+        Username:       userForm.Username,
+        Email:         userForm.Email,
+        PasswordHash:  string(hashedPassword),
+        Status:        1,
+        CreatedAt:     time.Now(),
+        UpdatedAt:     time.Now(),
+        RegistrationIP: c.Ctx.Input.IP(),
     }
 
     if err := c.userService.Create(user); err != nil {
@@ -70,6 +69,9 @@ func (c *UserController) CreateUser() {
     }
     c.ServeJSON()
 }
+
+
+
 // GetUser retrieves user by ID
 // @router /user/:id [get]
 func (c *UserController) GetUser() {
@@ -141,13 +143,14 @@ func (c *UserController) UpdateUser() {
     }
 
     var updateForm struct {
-        Username string `form:"username"`
-        Email    string `form:"email"`
-        Password string `form:"password"` // Optional password update
-        Status   int    `form:"status"`
+        Username string `json:"username"`
+        Email    string `json:"email"`
+        Password string `json:"password"`
+        Status   int    `json:"status"`
     }
 
-    if err := c.ParseForm(&updateForm); err != nil {
+    body, _ := io.ReadAll(c.Ctx.Request.Body)
+    if err := json.Unmarshal(body, &updateForm); err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
             "message": "Invalid form data",
@@ -180,18 +183,11 @@ func (c *UserController) UpdateUser() {
     
     // Update password if provided
     if updateForm.Password != "" {
-        hashedPassword, err := bcrypt.GenerateFromPassword([]byte(updateForm.Password), bcrypt.DefaultCost)
-        if err != nil {
-            c.Data["json"] = map[string]interface{}{
-                "success": false,
-                "message": "Password hashing failed",
-                "error":   err.Error(),
-            }
-            c.ServeJSON()
-            return
-        }
+        hashedPassword, _ := bcrypt.GenerateFromPassword([]byte(updateForm.Password), bcrypt.DefaultCost)
         user.PasswordHash = string(hashedPassword)
     }
+
+    user.UpdatedAt = time.Now()
 
     if err := c.userService.Update(user); err != nil {
         c.Data["json"] = map[string]interface{}{

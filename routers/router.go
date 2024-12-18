@@ -27,7 +27,9 @@ func InitRoutes() {
     // Other protected routes
     web.InsertFilter("/user/*", web.BeforeRouter, middleware.AuthMiddleware())
     web.InsertFilter("/users", web.BeforeRouter, middleware.AuthMiddleware())
+    web.InsertFilter("/api/*", web.BeforeRouter, middleware.AuthMiddleware())
     
+    // User Routes
     web.Router("/auth/logout", &controllers.AuthController{}, "post:Logout")
     web.Router("/user/:id", &controllers.UserController{}, "get:GetUser")
     web.Router("/user/:id", &controllers.UserController{}, "put:UpdateUser")
@@ -35,6 +37,7 @@ func InitRoutes() {
     web.Router("/users", &controllers.UserController{}, "get:ListUsers")
     web.Router("/user/:id/visits", &controllers.UserVisitLogController{}, "get:GetUserVisits")
 
+    // API routes
     // ItemUnit routes using the initialized controller instance
     web.Router("/api/item-units",  &controllers.ItemUnitController{}, "post:Create")
     web.Router("/api/item-units/:id",  &controllers.ItemUnitController{}, "get:Get")

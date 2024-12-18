@@ -4,6 +4,8 @@ import (
     "github.com/beego/beego/v2/server/web"
     "myproject/services"
 	"golang.org/x/crypto/bcrypt"
+	"encoding/json"
+	"io"
 )
 
 type AuthController struct {
@@ -21,11 +23,12 @@ func (c *AuthController) Prepare() {
 // @router /auth/login [post]
 func (c *AuthController) Login() {
     var loginForm struct {
-        Email    string `form:"email"`
-        Password string `form:"password"` // Raw password
+        Email    string `json:"Email"`
+        Password string `json:"Password"`
     }
 
-    if err := c.ParseForm(&loginForm); err != nil {
+    body, _ := io.ReadAll(c.Ctx.Request.Body)
+    if err := json.Unmarshal(body, &loginForm); err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
             "message": "Invalid form data",
@@ -34,7 +37,6 @@ func (c *AuthController) Login() {
         return
     }
 
-    // Get user by email and verify password
     user, err := c.userService.GetByEmail(loginForm.Email)
     if err != nil {
         c.Data["json"] = map[string]interface{}{
@@ -45,7 +47,6 @@ func (c *AuthController) Login() {
         return
     }
 
-    // Verify password using bcrypt
     if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(loginForm.Password)); err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
@@ -83,7 +84,6 @@ func (c *AuthController) Login() {
     }
     c.ServeJSON()
 }
-
 // Logout handles user logout
 // @router /auth/logout [post]
 func (c *AuthController) Logout() {
