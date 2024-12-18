@@ -84,7 +84,8 @@ func (s *UserService) List(page, pageSize int) ([]*models.User, int64, error) {
         return nil, 0, err
     }
     
-    _, err = qs.Offset(offset).Limit(pageSize).All(&users)
+    // Add OrderBy to ensure consistent ordering
+    _, err = qs.OrderBy("id").Offset(offset).Limit(pageSize).All(&users)
     return users, total, err
 }
 

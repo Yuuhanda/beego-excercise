@@ -104,7 +104,7 @@ func (c *UserController) GetUser() {
 // @router /users [get]
 func (c *UserController) ListUsers() {
     page, _ := c.GetInt("page", 1)
-    pageSize, _ := c.GetInt("page_size", 10)
+    pageSize, _ := c.GetInt("pageSize", 10)
 
     users, total, err := c.userService.List(page, pageSize)
     if err != nil {
