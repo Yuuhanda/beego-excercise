@@ -32,3 +32,10 @@ func (s *ConditionLookupService) Delete(id uint) error {
     _, err := s.ormer.Delete(condition)
     return err
 }
+
+// GetAll retrieves all condition lookups
+func (s *ConditionLookupService) GetAll() ([]*models.ConditionLookup, error) {
+    var conditions []*models.ConditionLookup
+    _, err := s.ormer.QueryTable(new(models.ConditionLookup)).All(&conditions)
+    return conditions, err
+}
