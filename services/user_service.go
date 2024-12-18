@@ -5,6 +5,10 @@ import (
     "time"
     "github.com/beego/beego/v2/client/orm"
     "myproject/models"
+    "crypto/rand"
+    "encoding/base64"
+    "fmt"
+    "golang.org/x/crypto/bcrypt"
 )
 
 type UserService struct {
@@ -94,4 +98,56 @@ func (s *UserService) UpdateStatus(id int, status int) error {
     user.UpdatedAt = time.Now()
     _, err := s.ormer.Update(user, "Status", "UpdatedAt")
     return err
+}
+// Add to existing UserService
+
+
+
+func (s *UserService) Authenticate(email, password string) (*models.User, error) {
+    user, err := s.GetByEmail(email)
+    if err != nil {
+        return nil, err
+    }
+    
+    if !verifyPassword(password, user.PasswordHash) {
+        return nil, errors.New("invalid credentials")
+    }
+    
+    return user, nil
+}
+
+func (s *UserService) GenerateAuthToken(user *models.User) error {
+    authKey := generateAuthKey()
+    user.AuthKey = authKey
+    user.UpdatedAt = time.Now()
+    
+    _, err := s.ormer.Update(user, "AuthKey", "UpdatedAt")
+    return err
+}
+
+func verifyPassword(password, hash string) bool {
+    err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+    return err == nil
+}
+
+func generateAuthKey() string {
+    // Generate a random 32-byte key
+    key := make([]byte, 32)
+    rand.Read(key)
+    
+    // Convert to base64 string
+    authKey := base64.StdEncoding.EncodeToString(key)
+    
+    // Add timestamp for uniqueness
+    timestamp := time.Now().Format("20060102150405")
+    return fmt.Sprintf("%s_%s", timestamp, authKey)
+}
+
+func (s *UserService) GetByAuthKey(authKey string) (*models.User, error) {
+    user := &models.User{AuthKey: authKey}
+    err := s.ormer.Read(user, "AuthKey")
+    if err == orm.ErrNoRows {
+        return nil, errors.New("user not found")
+    }
+    return user, err
 }

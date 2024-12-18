@@ -1,9 +1,10 @@
 package routers
 
 import (
+    "github.com/beego/beego/v2/server/web"
     "myproject/controllers"
+    "myproject/middleware"
     "myproject/database"
-    beego "github.com/beego/beego/v2/server/web"
 )
 
 func init() {
@@ -15,96 +16,109 @@ func InitRoutes() {
     // Get database instance first
     database.GetInstance()
 
-    beego.Router("/", &controllers.MainController{})
-    beego.Router("/api/user", &controllers.UserController{}, "post:CreateUser")
-    beego.Router("/api/user/:id", &controllers.UserController{}, "get:GetUser;put:UpdateUser;delete:DeleteUser")
-    beego.Router("/api/users", &controllers.UserController{}, "get:ListUsers")
+    // Public routes
+    web.Router("/auth/login", &controllers.AuthController{}, "post:Login")
 
+    // Admin-only route with multiple middleware
+    web.InsertFilter("/user", web.BeforeRouter, middleware.AuthMiddleware())
+    web.InsertFilter("/user", web.BeforeRouter, middleware.AdminMiddleware())
+    web.Router("/user", &controllers.UserController{}, "post:CreateUser")
+
+    // Other protected routes
+    web.InsertFilter("/user/*", web.BeforeRouter, middleware.AuthMiddleware())
+    web.InsertFilter("/users", web.BeforeRouter, middleware.AuthMiddleware())
+    
+    web.Router("/auth/logout", &controllers.AuthController{}, "post:Logout")
+    web.Router("/user/:id", &controllers.UserController{}, "get:GetUser")
+    web.Router("/user/:id", &controllers.UserController{}, "put:UpdateUser")
+    web.Router("/user/:id", &controllers.UserController{}, "delete:DeleteUser")
+    web.Router("/users", &controllers.UserController{}, "get:ListUsers")
+    web.Router("/user/:id/visits", &controllers.UserVisitLogController{}, "get:GetUserVisits")
 
     // ItemUnit routes using the initialized controller instance
-    beego.Router("/api/item-units",  &controllers.ItemUnitController{}, "post:Create")
-    beego.Router("/api/item-units/:id",  &controllers.ItemUnitController{}, "get:Get")
-    beego.Router("/api/item-units",  &controllers.ItemUnitController{}, "get:List")
-    beego.Router("/api/item-units/:id",  &controllers.ItemUnitController{}, "put:Update")
-    beego.Router("/api/item-units/:id",  &controllers.ItemUnitController{}, "delete:Delete")
-    beego.Router("/api/item-units/serial/:serialNumber",  &controllers.ItemUnitController{}, "get:GetBySerialNumber")
-    beego.Router("/api/item-units/warehouse/:warehouseId", &controllers.ItemUnitController{}, "get:GetByWarehouse")
+    web.Router("/api/item-units",  &controllers.ItemUnitController{}, "post:Create")
+    web.Router("/api/item-units/:id",  &controllers.ItemUnitController{}, "get:Get")
+    web.Router("/api/item-units",  &controllers.ItemUnitController{}, "get:List")
+    web.Router("/api/item-units/:id",  &controllers.ItemUnitController{}, "put:Update")
+    web.Router("/api/item-units/:id",  &controllers.ItemUnitController{}, "delete:Delete")
+    web.Router("/api/item-units/serial/:serialNumber",  &controllers.ItemUnitController{}, "get:GetBySerialNumber")
+    web.Router("/api/item-units/warehouse/:warehouseId", &controllers.ItemUnitController{}, "get:GetByWarehouse")
 
     // Item routes using the initialized controller instance
-    beego.Router("/api/item", &controllers.ItemController{}, "post:CreateItem")
-    beego.Router("/api/item/:id", &controllers.ItemController{}, "get:GetItem;put:UpdateItem;delete:DeleteItem")
-    beego.Router("/api/items", &controllers.ItemController{}, "get:ListItems")
-    beego.Router("/api/items/dashboard", &controllers.ItemController{}, "get:SearchDashboard")
+    web.Router("/api/item", &controllers.ItemController{}, "post:CreateItem")
+    web.Router("/api/item/:id", &controllers.ItemController{}, "get:GetItem;put:UpdateItem;delete:DeleteItem")
+    web.Router("/api/items", &controllers.ItemController{}, "get:ListItems")
+    web.Router("/api/items/dashboard", &controllers.ItemController{}, "get:SearchDashboard")
     //item image route
-    beego.Router("/api/item/:id/image", &controllers.ItemController{}, "get:GetItemImage")
+    web.Router("/api/item/:id/image", &controllers.ItemController{}, "get:GetItemImage")
 
     // Item Category Routes
     categoryCtrl := controllers.NewItemCategoryController()
-    beego.Router("/api/categories", categoryCtrl, "get:List")
-    beego.Router("/api/categories/:id", categoryCtrl, "get:Get")
-    beego.Router("/api/categories", categoryCtrl, "post:Create")
-    beego.Router("/api/categories/:id", categoryCtrl, "put:Update")
-    beego.Router("/api/categories/:id", categoryCtrl, "delete:Delete")
+    web.Router("/api/categories", categoryCtrl, "get:List")
+    web.Router("/api/categories/:id", categoryCtrl, "get:Get")
+    web.Router("/api/categories", categoryCtrl, "post:Create")
+    web.Router("/api/categories/:id", categoryCtrl, "put:Update")
+    web.Router("/api/categories/:id", categoryCtrl, "delete:Delete")
 
     employeeCtrl := controllers.NewEmployeeController()
     // Employee Routes
-    beego.Router("/api/employees", employeeCtrl, "post:Create")
-    beego.Router("/api/employees/:id", employeeCtrl, "get:Get")
-    beego.Router("/api/employees", employeeCtrl, "get:List")
-    beego.Router("/api/employees/:id", employeeCtrl, "put:Update")
-    beego.Router("/api/employees/:id", employeeCtrl, "delete:Delete")
+    web.Router("/api/employees", employeeCtrl, "post:Create")
+    web.Router("/api/employees/:id", employeeCtrl, "get:Get")
+    web.Router("/api/employees", employeeCtrl, "get:List")
+    web.Router("/api/employees/:id", employeeCtrl, "put:Update")
+    web.Router("/api/employees/:id", employeeCtrl, "delete:Delete")
 
     // Lending Routes
     lendingCtrl := &controllers.LendingController{}
-    beego.Router("/api/lendings", lendingCtrl, "post:Create")
-    beego.Router("/api/lendings/:id", lendingCtrl, "get:Get")
-    beego.Router("/api/lendings", lendingCtrl, "get:List")
-    beego.Router("/api/lendings/:id", lendingCtrl, "put:Update")
-    beego.Router("/api/lendings/:id", lendingCtrl, "delete:Delete")
-    beego.Router("/api/lendings/report/items", &controllers.LendingController{}, "get:SearchItemReport")
-    beego.Router("/api/lendings/report/units", &controllers.LendingController{}, "get:SearchUnitReport")
-    beego.Router("/api/lendings/return/:id", &controllers.LendingController{}, "put:Return")
+    web.Router("/api/lendings", lendingCtrl, "post:Create")
+    web.Router("/api/lendings/:id", lendingCtrl, "get:Get")
+    web.Router("/api/lendings", lendingCtrl, "get:List")
+    web.Router("/api/lendings/:id", lendingCtrl, "put:Update")
+    web.Router("/api/lendings/:id", lendingCtrl, "delete:Delete")
+    web.Router("/api/lendings/report/items", &controllers.LendingController{}, "get:SearchItemReport")
+    web.Router("/api/lendings/report/units", &controllers.LendingController{}, "get:SearchUnitReport")
+    web.Router("/api/lendings/return/:id", &controllers.LendingController{}, "put:Return")
     // Lending images routes
-    beego.Router("/api/lending/:id/loan-image", &controllers.LendingController{}, "get:GetLoanImage")
-    beego.Router("/api/lending/:id/return-image", &controllers.LendingController{}, "get:GetReturnImage")
+    web.Router("/api/lending/:id/loan-image", &controllers.LendingController{}, "get:GetLoanImage")
+    web.Router("/api/lending/:id/return-image", &controllers.LendingController{}, "get:GetReturnImage")
 
     // Additional lending-specific routes
-    beego.Router("/api/lendings/active", lendingCtrl, "get:GetActiveLoans")
-    beego.Router("/api/lendings/returned", lendingCtrl, "get:GetReturnedLoans")
+    web.Router("/api/lendings/active", lendingCtrl, "get:GetActiveLoans")
+    web.Router("/api/lendings/returned", lendingCtrl, "get:GetReturnedLoans")
     
     // Unit Log Routes
-    beego.Router("/api/unit-logs", &controllers.UnitLogController{}, "post:Create;get:List")
-    beego.Router("/api/unit-logs/:id", &controllers.UnitLogController{}, "get:Get;put:Update;delete:Delete")
-    beego.Router("/api/unit-logs/unit/:unitId", &controllers.UnitLogController{}, "get:GetByUnit")
+    web.Router("/api/unit-logs", &controllers.UnitLogController{}, "post:Create;get:List")
+    web.Router("/api/unit-logs/:id", &controllers.UnitLogController{}, "get:Get;put:Update;delete:Delete")
+    web.Router("/api/unit-logs/unit/:unitId", &controllers.UnitLogController{}, "get:GetByUnit")
 
     // Repair Log Routes
-    beego.Router("/api/repair-logs", &controllers.RepairLogController{}, "post:Create;get:List")
-    beego.Router("/api/repair-logs/:id", &controllers.RepairLogController{}, "get:Get;put:Update;delete:Delete")
-    beego.Router("/api/repair-logs/unit/:unitId", &controllers.RepairLogController{}, "get:GetByUnit")
-    beego.Router("/api/repair-logs/finish", &controllers.RepairLogController{}, "post:Finish")
+    web.Router("/api/repair-logs", &controllers.RepairLogController{}, "post:Create;get:List")
+    web.Router("/api/repair-logs/:id", &controllers.RepairLogController{}, "get:Get;put:Update;delete:Delete")
+    web.Router("/api/repair-logs/unit/:unitId", &controllers.RepairLogController{}, "get:GetByUnit")
+    web.Router("/api/repair-logs/finish", &controllers.RepairLogController{}, "post:Finish")
 
     // Document Upload Routes
-    beego.Router("/api/docs", &controllers.DocUploadedController{}, "post:Create;get:List")
-    beego.Router("/api/docs/:id", &controllers.DocUploadedController{}, "get:Get;delete:Delete")
+    web.Router("/api/docs", &controllers.DocUploadedController{}, "post:Create;get:List")
+    web.Router("/api/docs/:id", &controllers.DocUploadedController{}, "get:Get;delete:Delete")
     // Template download
-    beego.Router("/api/docs/template/download", &controllers.DocUploadedController{}, "get:DownloadTemplate")
+    web.Router("/api/docs/template/download", &controllers.DocUploadedController{}, "get:DownloadTemplate")
     // Upload Document
-    beego.Router("/api/docs/upload", &controllers.DocUploadedController{}, "post:Upload")
+    web.Router("/api/docs/upload", &controllers.DocUploadedController{}, "post:Upload")
 
 
     // Warehouse Routes
-    beego.Router("/api/warehouse", &controllers.WarehouseController{}, "post:CreateWarehouse")
-    beego.Router("/api/warehouse/:id", &controllers.WarehouseController{}, "get:GetWarehouse")
-    beego.Router("/api/warehouse/:id", &controllers.WarehouseController{}, "put:UpdateWarehouse")
-    beego.Router("/api/warehouse/:id", &controllers.WarehouseController{}, "delete:DeleteWarehouse")
-    beego.Router("/api/warehouses", &controllers.WarehouseController{}, "get:ListWarehouses")
-    beego.Router("/api/warehouse/:id/users", &controllers.WarehouseController{}, "get:GetWarehouseUsers")
+    web.Router("/api/warehouse", &controllers.WarehouseController{}, "post:CreateWarehouse")
+    web.Router("/api/warehouse/:id", &controllers.WarehouseController{}, "get:GetWarehouse")
+    web.Router("/api/warehouse/:id", &controllers.WarehouseController{}, "put:UpdateWarehouse")
+    web.Router("/api/warehouse/:id", &controllers.WarehouseController{}, "delete:DeleteWarehouse")
+    web.Router("/api/warehouses", &controllers.WarehouseController{}, "get:ListWarehouses")
+    web.Router("/api/warehouse/:id/users", &controllers.WarehouseController{}, "get:GetWarehouseUsers")
 
     // Status Lookup Routes
-    beego.Router("/api/status/:id", &controllers.StatusLookupController{}, "get:GetStatus")
-    beego.Router("/api/statuses", &controllers.StatusLookupController{}, "get:ListStatuses")
+    web.Router("/api/status/:id", &controllers.StatusLookupController{}, "get:GetStatus")
+    web.Router("/api/statuses", &controllers.StatusLookupController{}, "get:ListStatuses")
 
     //condition lookup routes
-    beego.Router("/api/condition/:id", &controllers.ConditionLookupController{}, "get:GetCondition")
-    beego.Router("/api/conditions", &controllers.ConditionLookupController{}, "get:ListConditions")
+    web.Router("/api/condition/:id", &controllers.ConditionLookupController{}, "get:GetCondition")
+    web.Router("/api/conditions", &controllers.ConditionLookupController{}, "get:ListConditions")
 }
