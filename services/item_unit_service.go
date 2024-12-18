@@ -269,6 +269,9 @@ func (s *ItemUnitService) List(page, pageSize int, filters map[string]interface{
         if userId, ok := filters["category"].(uint); ok && userId > 0 {
             qs = qs.Filter("item__category__id_category", userId)
         }
+        if itemId, ok := filters["Item.IdItem"].(uint); ok && itemId > 0 {
+            qs = qs.Filter("Item__IdItem", itemId)
+        }
     }
     
     total, _ := qs.Count()
@@ -298,11 +301,6 @@ func (s *ItemUnitService) List(page, pageSize int, filters map[string]interface{
     
     return items, total, err
 }
-
-
-
-
-
 
 // GetByWarehouse retrieves item units by warehouse ID
 func (s *ItemUnitService) GetByWarehouse(warehouseId uint) ([]*models.ItemUnit, error) {

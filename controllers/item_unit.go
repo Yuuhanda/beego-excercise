@@ -245,6 +245,12 @@ func (c *ItemUnitController) List() {
         }
     }
 
+    if itemIdStr := c.GetString("itemId"); itemIdStr != "" {
+        if itemId, err := strconv.ParseUint(itemIdStr, 10, 32); err == nil {
+            filters["Item.IdItem"] = uint(itemId) 
+        }
+    }
+
     items, total, err := c.itemUnitService.List(page, pageSize, filters)
     if err != nil {
         c.Data["json"] = map[string]interface{}{

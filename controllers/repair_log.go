@@ -46,9 +46,32 @@ func (c *RepairLogController) Create() {
         return
     }
 
+    //get username that created the item unit
+    user, err := c.userService.GetByID(int(request.IdUser))
+    if err != nil {
+        logs.Error("Failed to get user: %v", err)
+        c.Data["json"] = map[string]interface{}{
+            "error": "Failed to get user",
+        }
+        c.ServeJSON()
+        return
+    }
+
+    //get serial number
+    itemUnit, err := c.itemUnitService.Get(int(request.IdUnit))
+    if err != nil {
+        logs.Error("Failed to get item unit: %v", err)
+        c.Data["json"] = map[string]interface{}{
+            "error": "Failed to get item unit",
+        }
+        c.ServeJSON()
+        return
+    }
+
+
     repairLog := &models.RepairLog{
         IdUnit:   &models.ItemUnit{IdUnit: request.IdUnit},
-        Comment:  request.Comment,
+        Comment:  itemUnit.SerialNumber + " sent to repair by "+ user.Username + ". Info : " + request.Comment,
         RepType:  &models.RepTypeLookup{IdRepT: 1},
         Datetime: time.Now(),
     }
@@ -70,7 +93,7 @@ func (c *RepairLogController) Create() {
     }
 
     //get username that created the item unit
-    user, err := c.userService.GetByID(int(request.IdUser))
+    user, err = c.userService.GetByID(int(request.IdUser))
     if err != nil {
         logs.Error("Failed to get user: %v", err)
         c.Data["json"] = map[string]interface{}{
@@ -81,7 +104,7 @@ func (c *RepairLogController) Create() {
     }
 
     //get serial number
-    itemUnit, err := c.itemUnitService.Get(int(request.IdUnit))
+    itemUnit, err = c.itemUnitService.Get(int(request.IdUnit))
     if err != nil {
         logs.Error("Failed to get item unit: %v", err)
         c.Data["json"] = map[string]interface{}{

@@ -328,6 +328,9 @@ func (c *LendingController) Delete() {
 }
 
 func (c *LendingController) GetActiveLoans() {
+    page, _ := strconv.Atoi(c.GetString("page", "1"))
+    pageSize, _ := strconv.Atoi(c.GetString("pageSize", "10"))
+
     filters := map[string]string{
         "employee_name": c.GetString("employee_name"),
         "item_name":    c.GetString("item_name"),
@@ -337,7 +340,7 @@ func (c *LendingController) GetActiveLoans() {
         "end_date":     c.GetString("end_date"),
     }
 
-    lendings, err := c.lendingService.GetActiveLoans(filters)
+    lendings, total, err := c.lendingService.GetActiveLoans(page, pageSize, filters)
     if err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
@@ -349,12 +352,19 @@ func (c *LendingController) GetActiveLoans() {
 
     c.Data["json"] = map[string]interface{}{
         "success": true,
-        "data":    lendings,
+        "data": map[string]interface{}{
+            "lendings": lendings,
+            "total":    total,
+            "page":     page,
+            "size":     pageSize,
+        },
     }
     c.ServeJSON()
 }
-
 func (c *LendingController) GetReturnedLoans() {
+    page, _ := strconv.Atoi(c.GetString("page", "1"))
+    pageSize, _ := strconv.Atoi(c.GetString("pageSize", "10"))
+
     filters := map[string]string{
         "employee_name": c.GetString("employee_name"),
         "item_name":    c.GetString("item_name"),
@@ -364,7 +374,7 @@ func (c *LendingController) GetReturnedLoans() {
         "end_date":     c.GetString("end_date"),
     }
 
-    lendings, err := c.lendingService.GetReturnedLoans(filters)
+    lendings, total, err := c.lendingService.GetReturnedLoans(page, pageSize, filters)
     if err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
@@ -376,11 +386,15 @@ func (c *LendingController) GetReturnedLoans() {
 
     c.Data["json"] = map[string]interface{}{
         "success": true,
-        "data":    lendings,
+        "data": map[string]interface{}{
+            "lendings": lendings,
+            "total":    total,
+            "page":     page,
+            "size":     pageSize,
+        },
     }
     c.ServeJSON()
 }
-
 func (c *LendingController) SearchItemReport() {
     page, _ := strconv.Atoi(c.GetString("page", "1"))
     pageSize, _ := strconv.Atoi(c.GetString("pageSize", "20"))

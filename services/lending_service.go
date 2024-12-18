@@ -248,7 +248,7 @@ func (s *LendingService) List(page, pageSize int, filters map[string]string) ([]
 
 
 // GetActiveLoans retrieves all active loans (Type = 1)
-func (s *LendingService) GetActiveLoans(filters map[string]string) ([]*models.Lending, error) {
+func (s *LendingService) GetActiveLoans(page, pageSize int, filters map[string]string) ([]*models.Lending, int64, error) {
     o := orm.NewOrm()
     qs := o.QueryTable(new(models.Lending)).Filter("Type__IdType", 1)
     
@@ -272,10 +272,12 @@ func (s *LendingService) GetActiveLoans(filters map[string]string) ([]*models.Le
         qs = qs.Filter("Date__lte", endDate)
     }
 
+    total, _ := qs.Count()
+    
     var lendings []*models.Lending
-    _, err := qs.All(&lendings)
+    _, err := qs.Limit(pageSize).Offset((page - 1) * pageSize).All(&lendings)
     if err != nil {
-        return nil, err
+        return nil, 0, err
     }
 
     // Load all related data
@@ -328,10 +330,10 @@ func (s *LendingService) GetActiveLoans(filters map[string]string) ([]*models.Le
         }
     }
     
-    return lendings, nil
+    return lendings, total, nil
 }
 
-func (s *LendingService) GetReturnedLoans(filters map[string]string) ([]*models.Lending, error) {
+func (s *LendingService) GetReturnedLoans(page, pageSize int, filters map[string]string) ([]*models.Lending, int64, error) {
     o := orm.NewOrm()
     qs := o.QueryTable(new(models.Lending)).Filter("Type__IdType", 2)
     
@@ -355,10 +357,12 @@ func (s *LendingService) GetReturnedLoans(filters map[string]string) ([]*models.
         qs = qs.Filter("Date__lte", endDate)
     }
 
+    total, _ := qs.Count()
+    
     var lendings []*models.Lending
-    _, err := qs.All(&lendings)
+    _, err := qs.Limit(pageSize).Offset((page - 1) * pageSize).All(&lendings)
     if err != nil {
-        return nil, err
+        return nil, 0, err
     }
 
     // Load all related data
@@ -376,7 +380,6 @@ func (s *LendingService) GetReturnedLoans(filters map[string]string) ([]*models.
                 o.LoadRelated(unit.Item, "Category")
             }
 
-            // Create simplified User data
             if unit.User != nil {
                 unit.User = &models.User{
                     Id:       unit.User.Id,
@@ -388,7 +391,6 @@ func (s *LendingService) GetReturnedLoans(filters map[string]string) ([]*models.
             lending.IdUnit = unit
         }
         o.LoadRelated(lending, "IdUser")
-        // Simplify IdUser data
         if lending.IdUser != nil {
             userData := lending.IdUser
             lending.IdUser = &models.User{
@@ -411,9 +413,8 @@ func (s *LendingService) GetReturnedLoans(filters map[string]string) ([]*models.
         }
     }
     
-    return lendings, nil
+    return lendings, total, nil
 }
-
 
 func (s *LendingService) SearchItemReport(page, pageSize int, filters map[string]string) ([]map[string]interface{}, int64, error) {
     o := orm.NewOrm()
