@@ -35,8 +35,13 @@ func InitRoutes() {
     web.Router("/api/user-roles/user/:userId", &controllers.AuthRolesUserController{}, "get:GetUserRoles")
     web.Router("/api/user-roles/role/:roleId", &controllers.AuthRolesUserController{}, "get:GetRoleUsers")
     web.Router("/api/user-roles/:userId/:roleId", &controllers.AuthRolesUserController{}, "delete:Delete")
+    // Auth Item Routes
+    web.Router("/api/auth-items", &controllers.AuthItemController{}, "post:Create")
+    web.Router("/api/auth-items/:id", &controllers.AuthItemController{}, "get:Get")
+    web.Router("/api/auth-items", &controllers.AuthItemController{}, "get:List")
+    web.Router("/api/auth-items/:id", &controllers.AuthItemController{}, "put:Update")
+    web.Router("/api/auth-items/:id", &controllers.AuthItemController{}, "delete:Delete")
 
-    
     // Admin-only route with multiple middleware
     web.InsertFilter("/user", web.BeforeRouter, middleware.AuthMiddleware())
     web.InsertFilter("/user", web.BeforeRouter, middleware.AdminMiddleware())
