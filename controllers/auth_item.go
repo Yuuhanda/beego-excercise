@@ -120,11 +120,20 @@ func (c *AuthItemController) Update() {
 func (c *AuthItemController) Delete() {
     id, _ := c.GetInt(":id")
     
-    if err := c.authItemService.Delete(id); err != nil {
-        c.Data["json"] = map[string]interface{}{
-            "success": false,
-            "message": "Failed to delete auth item",
-            "error":   err.Error(),
+    err := c.authItemService.Delete(id)
+    if err != nil {
+        message := err.Error()
+        if message == "no auth item found with this id" {
+            c.Data["json"] = map[string]interface{}{
+                "success": false,
+                "message": message,
+            }
+        } else {
+            c.Data["json"] = map[string]interface{}{
+                "success": false,
+                "message": "Failed to delete auth item",
+                "error":   err.Error(),
+            }
         }
     } else {
         c.Data["json"] = map[string]interface{}{
@@ -134,3 +143,4 @@ func (c *AuthItemController) Delete() {
     }
     c.ServeJSON()
 }
+

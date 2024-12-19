@@ -33,6 +33,6 @@ func init() {
     os.Setenv("TZ", "Asia/Jakarta")
     time.Local = time.FixedZone("WIB", 7*60*60) // WIB = UTC+7
     database.InitDatabase()
-    logs.SetLogger(logs.AdapterConsole, "")
-    logs.SetLogger(logs.AdapterFile, `{"filename":"logs/app.log","level":7,"maxlines":0,"maxsize":0,"daily":true,"maxdays":10}`)
+    //logs.SetLogger(logs.AdapterConsole, "")
+    //logs.SetLogger(logs.AdapterFile, `{"filename":"logs/app.log","level":7,"maxlines":0,"maxsize":0,"daily":true,"maxdays":10}`)
 }

@@ -92,7 +92,17 @@ func (s *AuthItemService) Update(authItem *models.AuthItem) error {
 }
 
 func (s *AuthItemService) Delete(id int) error {
+    // Check if auth item exists
     authItem := &models.AuthItem{Id: id}
-    _, err := s.ormer.Delete(authItem)
+    err := s.ormer.Read(authItem)
+    if err == orm.ErrNoRows {
+        return errors.New("no auth item found with this id")
+    }
+    if err != nil {
+        return err
+    }
+
+    // Proceed with deletion
+    _, err = s.ormer.Delete(authItem)
     return err
 }
