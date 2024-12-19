@@ -4,6 +4,7 @@ import (
     "errors"
     "github.com/beego/beego/v2/client/orm"
     "myproject/models"
+    //filter 
 )
 
 type AuthItemService struct {
@@ -106,3 +107,38 @@ func (s *AuthItemService) Delete(id int) error {
     _, err = s.ormer.Delete(authItem)
     return err
 }
+
+func (s *AuthItemService) CreateBulk(role string, paths []string) error {
+    // Verify role exists first
+    count, err := s.ormer.QueryTable("auth_roles").Filter("code", role).Count()
+    if err != nil || count == 0 {
+        return errors.New("role not found")
+    }
+
+    // Use single ormer instance
+    o := orm.NewOrm()
+    
+    for _, path := range paths {
+        // Check if combination already exists
+        exists := o.QueryTable(new(models.AuthItem)).
+            Filter("role", role).
+            Filter("path", path).
+            Exist()
+        if exists {
+            continue
+        }
+
+        // Create new auth item
+        authItem := &models.AuthItem{
+            Role: role,
+            Path: path,
+        }
+        _, err = o.Insert(authItem)
+        if err != nil {
+            return err
+        }
+    }
+
+    return nil
+}
+

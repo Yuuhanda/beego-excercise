@@ -144,3 +144,34 @@ func (c *AuthItemController) Delete() {
     c.ServeJSON()
 }
 
+func (c *AuthItemController) CreateBulk() {
+    var payload struct {
+        Role  string   `json:"Role"`
+        Paths []string `json:"Paths"`
+    }
+    
+    if err := json.NewDecoder(c.Ctx.Request.Body).Decode(&payload); err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Invalid JSON data",
+            "error":   err.Error(),
+        }
+        c.ServeJSON()
+        return
+    }
+
+    if err := c.authItemService.CreateBulk(payload.Role, payload.Paths); err != nil {
+        c.Data["json"] = map[string]interface{}{
+            "success": false,
+            "message": "Failed to create auth items",
+            "error":   err.Error(),
+        }
+    } else {
+        c.Data["json"] = map[string]interface{}{
+            "success": true,
+            "message": "Auth items created successfully",
+        }
+    }
+    c.ServeJSON()
+}
+

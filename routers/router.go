@@ -41,6 +41,7 @@ func InitRoutes() {
     web.Router("/api/auth-items", &controllers.AuthItemController{}, "get:List")
     web.Router("/api/auth-items/:id", &controllers.AuthItemController{}, "put:Update")
     web.Router("/api/auth-items/:id", &controllers.AuthItemController{}, "delete:Delete")
+    web.Router("/api/auth-items/bulk", &controllers.AuthItemController{}, "post:CreateBulk")
 
     // Admin-only route with multiple middleware
     web.InsertFilter("/user", web.BeforeRouter, middleware.AuthMiddleware())
