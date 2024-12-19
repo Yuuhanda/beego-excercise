@@ -47,11 +47,11 @@ func (c *AuthRolesController) Create() {
 
 
 func (c *AuthRolesController) Get() {
-    idStr := c.Ctx.Input.Param(":id")
-    var id int
-    fmt.Sscanf(idStr, "%d", &id)
+    idStr := c.Ctx.Input.Param(":code")
+    var code string
+    fmt.Sscanf(idStr, "%d", &code)
 
-    role, err := c.roleService.GetByID(id)
+    role, err := c.roleService.GetByID(code)
     if err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
@@ -92,9 +92,9 @@ func (c *AuthRolesController) List() {
 }
 
 func (c *AuthRolesController) Update() {
-    idStr := c.Ctx.Input.Param(":id")
-    var id int
-    fmt.Sscanf(idStr, "%d", &id)
+    idStr := c.Ctx.Input.Param(":code")
+    var code string
+    fmt.Sscanf(idStr, "%d", &code)
 
     var role models.AuthRoles
     if err := json.NewDecoder(c.Ctx.Request.Body).Decode(&role); err != nil {
@@ -107,7 +107,7 @@ func (c *AuthRolesController) Update() {
         return
     }
 
-    role.Id = id
+    role.Code = code
     if err := c.roleService.Update(&role); err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
@@ -125,12 +125,12 @@ func (c *AuthRolesController) Update() {
 }
 
 func (c *AuthRolesController) Delete() {
-    idStr := c.Ctx.Input.Param(":id")
-    var id int
-    fmt.Sscanf(idStr, "%d", &id)
+    idStr := c.Ctx.Input.Param(":code")
+    var code string
+    fmt.Sscanf(idStr, "%d", &code)
 
     // Check if role exists first
-    role, err := c.roleService.GetByID(id)
+    role, err := c.roleService.GetByID(code)
     if err != nil || role == nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
@@ -140,7 +140,7 @@ func (c *AuthRolesController) Delete() {
         return
     }
 
-    if err := c.roleService.Delete(id); err != nil {
+    if err := c.roleService.Delete(code); err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
             "message": "Failed to delete role",
