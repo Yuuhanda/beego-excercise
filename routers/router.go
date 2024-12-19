@@ -24,12 +24,21 @@ func InitRoutes() {
     web.Router("/api/routes/scan", &controllers.APIRouteController{}, "post:ScanRoutes")
     web.Router("/api/routes/list", &controllers.APIRouteController{}, "get:ListRoutes")
     web.Router("/api/routes/:id", &controllers.APIRouteController{}, "get:Get;delete:DeleteRoute")
+    // Auth Roles Routes
+    web.Router("/api/roles", &controllers.AuthRolesController{}, "post:Create")
+    web.Router("/api/roles/:id", &controllers.AuthRolesController{}, "get:Get")
+    web.Router("/api/roles", &controllers.AuthRolesController{}, "get:List")
+    web.Router("/api/roles/:id", &controllers.AuthRolesController{}, "put:Update")
+    web.Router("/api/roles/:id", &controllers.AuthRolesController{}, "delete:Delete")
+
 
     // Admin-only route with multiple middleware
     web.InsertFilter("/user", web.BeforeRouter, middleware.AuthMiddleware())
     web.InsertFilter("/user", web.BeforeRouter, middleware.AdminMiddleware())
     web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AuthMiddleware())
     web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AdminMiddleware())
+    web.InsertFilter("/api/roles/*", web.BeforeRouter, middleware.AuthMiddleware())
+    web.InsertFilter("/api/roles/*", web.BeforeRouter, middleware.AdminMiddleware())
     web.Router("/user", &controllers.UserController{}, "post:CreateUser")
 
     // Other protected routes
