@@ -82,6 +82,23 @@ func (c *AuthController) Login() {
             "token": user.AuthKey,
         },
     }
+
+    // Generate auth token
+    token := user.AuthKey // Use the generated AuthKey
+
+    // Get user roles
+    roleUserService := services.NewAuthRolesUserService()
+    roles, _ := roleUserService.GetRolesByUserId(user.Id)
+
+    c.Data["json"] = map[string]interface{}{
+        "success": true,
+        "message": "Login successful",
+        "data": map[string]interface{}{
+            "token": token,
+            "user":  user,
+            "roles": roles,
+        },
+    }
     c.ServeJSON()
 }
 // Logout handles user logout

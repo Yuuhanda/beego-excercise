@@ -142,3 +142,12 @@ func (s *AuthItemService) CreateBulk(role string, paths []string) error {
     return nil
 }
 
+
+func (s *AuthItemService) CheckPermission(role, path, method string) (bool, error) {
+    count, err := s.ormer.QueryTable(new(models.AuthItem)).
+        Filter("role", role).
+        Filter("path", path).
+        Count()
+    
+    return count > 0, err
+}

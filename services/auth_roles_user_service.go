@@ -38,11 +38,11 @@ func (s *AuthRolesUserService) Create(roleUser *models.AuthRolesUser) error {
 
 
 
-func (s *AuthRolesUserService) GetRolesByUserId(UserId int) ([]*models.AuthRoles, error) {
+func (s *AuthRolesUserService) GetRolesByUserId(userId int) ([]*models.AuthRoles, error) {
     var roles []*models.AuthRoles
-    _, err := s.ormer.Raw("SELECT r.* FROM auth_roles r "+
-        "JOIN auth_roles_user ru ON r.id = ru.roles_id "+
-        "WHERE ru.user_id = ?", UserId).QueryRows(&roles)
+    _, err := s.ormer.Raw("SELECT ar.* FROM auth_roles ar "+
+        "JOIN auth_roles_user aru ON ar.code = aru.roles_code "+
+        "WHERE aru.user_id = ?", userId).QueryRows(&roles)
     return roles, err
 }
 
