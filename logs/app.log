@@ -840,3 +840,26 @@
 2024/12/19 13:28:30.970  [I] [server.go:280]  http server Running on http://:8082
 2024/12/19 13:28:32.631  [I] [server.go:280]  http server Running on http://:8082
 2024/12/19 13:28:46.948  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     5.3548ms|   match|[46m POST    [0m /api/user-roles   r:/api/user-roles
+2024/12/19 13:35:55.611  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 13:35:57.532  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 13:36:02.124  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 13:41:46.299  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 13:43:16.573  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 13:43:27.316  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 13:43:43.357  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 13:43:43.378  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 13:43:43.432  [C] [server.go:297]  ListenAndServe:  listen tcp :8082: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+2024/12/19 13:43:44.801  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 13:43:44.841  [C] [server.go:297]  ListenAndServe:  listen tcp :8082: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+2024/12/19 13:43:47.523  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 13:43:47.524  [C] [server.go:297]  ListenAndServe:  listen tcp :8082: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+2024/12/19 13:46:37.887  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     4.2669ms|   match|[46m POST    [0m /api/auth-items   r:/api/auth-items
+2024/12/19 13:47:14.766  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     4.4195ms|   match|[46m POST    [0m /api/auth-items   r:/api/auth-items
+2024/12/19 13:49:22.711  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 13:49:22.771  [C] [server.go:297]  ListenAndServe:  listen tcp :8082: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+2024/12/19 13:49:24.282  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 13:49:24.300  [C] [server.go:297]  ListenAndServe:  listen tcp :8082: bind: Only one usage of each socket address (protocol/network address/port) is normally permitted.
+2024/12/19 13:49:28.816  [I] [main.go:25]  Shutting down server...
+2024/12/19 13:49:28.816  [I] [main.go:25]  Shutting down server...
+2024/12/19 13:49:41.309  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 13:49:48.602  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     1.6687ms|   match|[46m POST    [0m /api/auth-items   r:/api/auth-items
