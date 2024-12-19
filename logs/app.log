@@ -784,3 +784,5 @@
 2024/12/19 11:05:31.409  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     1.9562ms|   match|[44m GET     [0m /api/user-roles/user/25   r:/api/user-roles/user/:userId
 2024/12/19 11:07:36.026  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     3.8851ms|   match|[46m POST    [0m /api/user-roles   r:/api/user-roles
 2024/12/19 11:09:06.266  [D] [router.go:1306]  |            ::1|[43m 404 [0m|     1.5487ms| nomatch|[44m GET     [0m /api/user-roles/roles/4
+2024/12/19 11:09:22.455  [D] [router.go:1306]  |            ::1|[42m 200 [0m|      1.257ms|   match|[44m GET     [0m /api/user-roles/role/4   r:/api/user-roles/role/:roleId
+2024/12/19 11:10:51.890  [D] [router.go:1306]  |            ::1|[42m 200 [0m|      1.988ms|   match|[41m DELETE  [0m /api/user-roles/25/4   r:/api/user-roles/:userId/:roleId
