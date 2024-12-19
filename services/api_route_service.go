@@ -5,9 +5,6 @@ import (
     "github.com/beego/beego/v2/client/orm"
     "myproject/models"
     "github.com/beego/beego/v2/core/logs"
-    "go/ast"
-    "go/token"
-    "strings"
 )
 
 type APIRouteService struct {
@@ -104,13 +101,6 @@ func (s *APIRouteService) GetRoute(id int) (*models.ApiRoute, error) {
     route := &models.ApiRoute{Id: id}
     err := s.ormer.Read(route)
     return route, err
-}
-
-func extractStringValue(expr ast.Expr) string {
-    if lit, ok := expr.(*ast.BasicLit); ok && lit.Kind == token.STRING {
-        return strings.Trim(lit.Value, "\"")
-    }
-    return ""
 }
 
 func (s *APIRouteService) routeExists(path, method string) (bool, error) {

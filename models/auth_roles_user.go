@@ -6,7 +6,7 @@ import (
 
 type AuthRolesUser struct {
     UserId      *User 		`orm:"rel(fk);column(user_id)"`
-    RoleId   	*AuthRoles 	`orm:"rel(fk);column(roles_id)"`
+    RoleId   	*AuthRoles 	`orm:"rel(fk);column(roles_code)"`
 }
 
 func init() {

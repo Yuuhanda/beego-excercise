@@ -24,8 +24,8 @@ func (s *AuthRolesService) Create(role *models.AuthRoles) error {
     return err
 }
 
-func (s *AuthRolesService) GetByID(id int) (*models.AuthRoles, error) {
-    role := &models.AuthRoles{Id: id}
+func (s *AuthRolesService) GetByID(code string) (*models.AuthRoles, error) {
+    role := &models.AuthRoles{Code: code}
     err := s.ormer.Read(role)
     if err == orm.ErrNoRows {
         return nil, errors.New("role not found")
@@ -49,16 +49,16 @@ func (s *AuthRolesService) List(page, pageSize int) ([]*models.AuthRoles, int64,
 }
 
 func (s *AuthRolesService) Update(role *models.AuthRoles) error {
-    if role.Id == 0 {
-        return errors.New("role ID is required")
+    if role.Code == "" {
+        return errors.New("role Code is required")
     }
     role.UpdatedAt = time.Now()
     _, err := s.ormer.Update(role)
     return err
 }
 
-func (s *AuthRolesService) Delete(id int) error {
-    role := &models.AuthRoles{Id: id}
+func (s *AuthRolesService) Delete(code string) error {
+    role := &models.AuthRoles{Code: code}
     _, err := s.ormer.Delete(role)
     return err
 }
