@@ -676,3 +676,111 @@
 2024/12/19 10:02:29.988  [I] [server.go:280]  http server Running on http://:8082
 2024/12/19 10:02:30.515  [D] [router.go:1306]  |            ::1|[42m 200 [0m|   165.6934ms|   match|[41m DELETE  [0m /api/roles/10   r:/api/roles/:id
 2024/12/19 10:02:31.737  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:44:31.130  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:47:10.734  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:47:15.542  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:47:50.524  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:47:52.370  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:47:55.028  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:47:58.469  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:48:00.643  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:48:04.035  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:48:06.226  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:48:10.090  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:48:12.585  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:48:15.992  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:48:18.627  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:48:22.288  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:49:52.254  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:49:53.912  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:49:56.570  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:50:14.782  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:50:22.971  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:50:24.499  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:50:27.674  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:50:31.190  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:52:42.556  [I] [api_route_service.go:72]  Added new route: POST /api/roles
+2024/12/19 10:52:42.560  [I] [api_route_service.go:72]  Added new route: GET /api/roles/:id
+2024/12/19 10:52:42.563  [I] [api_route_service.go:72]  Added new route: GET /api/roles
+2024/12/19 10:52:42.566  [I] [api_route_service.go:72]  Added new route: PUT /api/roles/:id
+2024/12/19 10:52:42.569  [I] [api_route_service.go:72]  Added new route: DELETE /api/roles/:id
+2024/12/19 10:52:42.573  [I] [api_route_service.go:72]  Added new route: POST /api/user-roles
+2024/12/19 10:52:42.579  [I] [api_route_service.go:72]  Added new route: GET /api/user-roles/user/:userId
+2024/12/19 10:52:42.584  [I] [api_route_service.go:72]  Added new route: GET /api/user-roles/role/:roleId
+2024/12/19 10:52:42.586  [I] [api_route_service.go:72]  Added new route: DELETE /api/user-roles/:userId/:roleId
+2024/12/19 10:52:42.615  [I] [api_route_service.go:96]  Deleted removed route: GET /api/categories
+2024/12/19 10:52:42.616  [I] [api_route_service.go:96]  Deleted removed route: POST /api/categories
+2024/12/19 10:52:42.617  [I] [api_route_service.go:96]  Deleted removed route: DELETE /api/categories/:id
+2024/12/19 10:52:42.618  [I] [api_route_service.go:96]  Deleted removed route: GET /api/categories/:id
+2024/12/19 10:52:42.619  [I] [api_route_service.go:96]  Deleted removed route: PUT /api/categories/:id
+2024/12/19 10:52:42.621  [I] [api_route_service.go:96]  Deleted removed route: GET /api/condition/:id
+2024/12/19 10:52:42.622  [I] [api_route_service.go:96]  Deleted removed route: GET /api/conditions
+2024/12/19 10:52:42.623  [I] [api_route_service.go:96]  Deleted removed route: GET /api/docs/template/download
+2024/12/19 10:52:42.624  [I] [api_route_service.go:96]  Deleted removed route: POST /api/docs/upload
+2024/12/19 10:52:42.625  [I] [api_route_service.go:96]  Deleted removed route: GET /api/employees
+2024/12/19 10:52:42.627  [I] [api_route_service.go:96]  Deleted removed route: POST /api/employees
+2024/12/19 10:52:42.628  [I] [api_route_service.go:96]  Deleted removed route: DELETE /api/employees/:id
+2024/12/19 10:52:42.629  [I] [api_route_service.go:96]  Deleted removed route: GET /api/employees/:id
+2024/12/19 10:52:42.630  [I] [api_route_service.go:96]  Deleted removed route: PUT /api/employees/:id
+2024/12/19 10:52:42.631  [I] [api_route_service.go:96]  Deleted removed route: POST /api/item
+2024/12/19 10:52:42.632  [I] [api_route_service.go:96]  Deleted removed route: GET /api/item-units
+2024/12/19 10:52:42.633  [I] [api_route_service.go:96]  Deleted removed route: POST /api/item-units
+2024/12/19 10:52:42.635  [I] [api_route_service.go:96]  Deleted removed route: DELETE /api/item-units/:id
+2024/12/19 10:52:42.636  [I] [api_route_service.go:96]  Deleted removed route: GET /api/item-units/:id
+2024/12/19 10:52:42.636  [I] [api_route_service.go:96]  Deleted removed route: PUT /api/item-units/:id
+2024/12/19 10:52:42.637  [I] [api_route_service.go:96]  Deleted removed route: GET /api/item-units/serial/:serialNumber
+2024/12/19 10:52:42.638  [I] [api_route_service.go:96]  Deleted removed route: GET /api/item-units/warehouse/:warehouseId
+2024/12/19 10:52:42.640  [I] [api_route_service.go:96]  Deleted removed route: GET /api/item/:id/image
+2024/12/19 10:52:42.641  [I] [api_route_service.go:96]  Deleted removed route: GET /api/items
+2024/12/19 10:52:42.642  [I] [api_route_service.go:96]  Deleted removed route: GET /api/items/dashboard
+2024/12/19 10:52:42.643  [I] [api_route_service.go:96]  Deleted removed route: GET /api/lending/:id/loan-image
+2024/12/19 10:52:42.645  [I] [api_route_service.go:96]  Deleted removed route: GET /api/lending/:id/return-image
+2024/12/19 10:52:42.646  [I] [api_route_service.go:96]  Deleted removed route: GET /api/lendings
+2024/12/19 10:52:42.647  [I] [api_route_service.go:96]  Deleted removed route: POST /api/lendings
+2024/12/19 10:52:42.648  [I] [api_route_service.go:96]  Deleted removed route: DELETE /api/lendings/:id
+2024/12/19 10:52:42.649  [I] [api_route_service.go:96]  Deleted removed route: GET /api/lendings/:id
+2024/12/19 10:52:42.651  [I] [api_route_service.go:96]  Deleted removed route: PUT /api/lendings/:id
+2024/12/19 10:52:42.652  [I] [api_route_service.go:96]  Deleted removed route: GET /api/lendings/active
+2024/12/19 10:52:42.653  [I] [api_route_service.go:96]  Deleted removed route: GET /api/lendings/report/items
+2024/12/19 10:52:42.654  [I] [api_route_service.go:96]  Deleted removed route: GET /api/lendings/report/units
+2024/12/19 10:52:42.655  [I] [api_route_service.go:96]  Deleted removed route: PUT /api/lendings/return/:id
+2024/12/19 10:52:42.656  [I] [api_route_service.go:96]  Deleted removed route: GET /api/lendings/returned
+2024/12/19 10:52:42.658  [I] [api_route_service.go:96]  Deleted removed route: POST /api/repair-logs/finish
+2024/12/19 10:52:42.659  [I] [api_route_service.go:96]  Deleted removed route: GET /api/repair-logs/unit/:unitId
+2024/12/19 10:52:42.661  [I] [api_route_service.go:96]  Deleted removed route: POST /api/routes/clean
+2024/12/19 10:52:42.662  [I] [api_route_service.go:96]  Deleted removed route: GET /api/routes/list
+2024/12/19 10:52:42.663  [I] [api_route_service.go:96]  Deleted removed route: POST /api/routes/scan
+2024/12/19 10:52:42.664  [I] [api_route_service.go:96]  Deleted removed route: GET /api/status/:id
+2024/12/19 10:52:42.665  [I] [api_route_service.go:96]  Deleted removed route: GET /api/statuses
+2024/12/19 10:52:42.666  [I] [api_route_service.go:96]  Deleted removed route: GET /api/unit-logs/unit/:unitId
+2024/12/19 10:52:42.667  [I] [api_route_service.go:96]  Deleted removed route: POST /api/warehouse
+2024/12/19 10:52:42.669  [I] [api_route_service.go:96]  Deleted removed route: DELETE /api/warehouse/:id
+2024/12/19 10:52:42.670  [I] [api_route_service.go:96]  Deleted removed route: GET /api/warehouse/:id
+2024/12/19 10:52:42.671  [I] [api_route_service.go:96]  Deleted removed route: PUT /api/warehouse/:id
+2024/12/19 10:52:42.672  [I] [api_route_service.go:96]  Deleted removed route: GET /api/warehouse/:id/users
+2024/12/19 10:52:42.673  [I] [api_route_service.go:96]  Deleted removed route: GET /api/warehouses
+2024/12/19 10:52:42.674  [I] [api_route_service.go:96]  Deleted removed route: POST /auth/login
+2024/12/19 10:52:42.675  [I] [api_route_service.go:96]  Deleted removed route: POST /auth/logout
+2024/12/19 10:52:42.676  [I] [api_route_service.go:96]  Deleted removed route: POST /user
+2024/12/19 10:52:42.678  [I] [api_route_service.go:96]  Deleted removed route: DELETE /user/:id
+2024/12/19 10:52:42.678  [I] [api_route_service.go:96]  Deleted removed route: GET /user/:id
+2024/12/19 10:52:42.679  [I] [api_route_service.go:96]  Deleted removed route: PUT /user/:id
+2024/12/19 10:52:42.680  [I] [api_route_service.go:96]  Deleted removed route: GET /user/:id/visits
+2024/12/19 10:52:42.681  [I] [api_route_service.go:96]  Deleted removed route: GET /users
+2024/12/19 10:52:42.683  [D] [router.go:1306]  |            ::1|[42m 200 [0m|   135.1698ms|   match|[46m POST    [0m /api/routes/scan   r:/api/routes/scan
+2024/12/19 10:56:23.428  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     1.7566ms|   match|[46m POST    [0m /api/user-roles   r:/api/user-roles
+2024/12/19 10:57:08.792  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:57:14.695  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     2.9486ms|   match|[46m POST    [0m /api/user-roles   r:/api/user-roles
+2024/12/19 10:58:54.673  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:58:56.041  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:58:59.062  [D] [router.go:1306]  |            ::1|[42m 200 [0m|      4.445ms|   match|[46m POST    [0m /api/user-roles   r:/api/user-roles
+2024/12/19 10:59:38.422  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 11:02:04.510  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     3.7405ms|   match|[46m POST    [0m /api/user-roles   r:/api/user-roles
+2024/12/19 11:03:18.918  [D] [router.go:1306]  |            ::1|[43m 401 [0m|           0s| nomatch|[44m GET     [0m /api/user-roles
+2024/12/19 11:04:46.609  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     1.3466ms|   match|[44m GET     [0m /api/user-roles/user/25   r:/api/user-roles/user/:userId
+2024/12/19 11:05:23.914  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 11:05:25.774  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 11:05:29.665  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 11:05:31.409  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     1.9562ms|   match|[44m GET     [0m /api/user-roles/user/25   r:/api/user-roles/user/:userId
+2024/12/19 11:07:36.026  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     3.8851ms|   match|[46m POST    [0m /api/user-roles   r:/api/user-roles
+2024/12/19 11:09:06.266  [D] [router.go:1306]  |            ::1|[43m 404 [0m|     1.5487ms| nomatch|[44m GET     [0m /api/user-roles/roles/4
