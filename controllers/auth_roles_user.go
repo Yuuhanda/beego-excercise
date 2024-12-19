@@ -5,6 +5,7 @@ import (
     "myproject/services"
     "myproject/models"
     "encoding/json"
+    "strconv"
 )
 
 type AuthRolesUserController struct {
@@ -18,8 +19,8 @@ func (c *AuthRolesUserController) Prepare() {
 
 func (c *AuthRolesUserController) Create() {
     var payload struct {
-        UserId int `json:"UserId"`
-        RoleId int `json:"RoleId"`
+        UserId int    `json:"UserId"`
+        Code   string `json:"Code"`
     }
     
     if err := json.NewDecoder(c.Ctx.Request.Body).Decode(&payload); err != nil {
@@ -34,7 +35,7 @@ func (c *AuthRolesUserController) Create() {
 
     roleUser := &models.AuthRolesUser{
         UserId: &models.User{Id: payload.UserId},
-        RoleId: &models.AuthRoles{Id: payload.RoleId},
+        RoleId: &models.AuthRoles{Code: payload.Code},
     }
 
     if err := c.roleUserService.Create(roleUser); err != nil {
@@ -52,9 +53,11 @@ func (c *AuthRolesUserController) Create() {
     }
     c.ServeJSON()
 }
+
+
 func (c *AuthRolesUserController) GetUserRoles() {
-    userId, _ := c.GetInt(":userId")
-    roles, err := c.roleUserService.GetRolesByUserId(userId)
+    UserId, _ := c.GetInt(":userId")
+    roles, err := c.roleUserService.GetRolesByUserId(UserId)
     
     if err != nil {
         c.Data["json"] = map[string]interface{}{
@@ -72,7 +75,7 @@ func (c *AuthRolesUserController) GetUserRoles() {
 }
 
 func (c *AuthRolesUserController) GetRoleUsers() {
-    roleId, _ := c.GetInt(":roleId")
+    roleId := c.Ctx.Input.Param(":roleId")
     users, err := c.roleUserService.GetUsersByRoleId(roleId)
     
     if err != nil {
@@ -90,11 +93,13 @@ func (c *AuthRolesUserController) GetRoleUsers() {
     c.ServeJSON()
 }
 
-func (c *AuthRolesUserController) Delete() {
-    userId, _ := c.GetInt(":userId")
-    roleId, _ := c.GetInt(":roleId")
 
-    if err := c.roleUserService.Delete(userId, roleId); err != nil {
+
+func (c *AuthRolesUserController) Delete() {
+    userId := c.Ctx.Input.Param(":userId")
+    userIdInt, _ := strconv.Atoi(userId)
+
+    if err := c.roleUserService.Delete(userIdInt); err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
             "message": "Failed to remove role from user",
@@ -108,3 +113,4 @@ func (c *AuthRolesUserController) Delete() {
     }
     c.ServeJSON()
 }
+
