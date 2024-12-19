@@ -620,3 +620,59 @@
 2024/12/19 09:22:43.562  [I] [server.go:280]  http server Running on http://:8082
 2024/12/19 09:22:45.662  [I] [server.go:280]  http server Running on http://:8082
 2024/12/19 09:22:48.566  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     2.8693ms|   match|[44m GET     [0m /api/routes/235   r:/api/routes/:id
+2024/12/19 09:33:19.447  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:33:20.875  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:33:24.085  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:35:40.727  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:35:45.129  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:35:58.279  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:36:00.000  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:36:02.920  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:36:06.021  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:37:51.889  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:37:56.488  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:38:01.650  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:38:03.208  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:38:05.748  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:41:42.645  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     2.9042ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 09:41:58.561  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     4.5731ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 09:42:22.231  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     4.3829ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 09:43:03.518  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     4.3173ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 09:43:05.244  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     2.8256ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 09:46:11.565  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     4.5938ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 09:46:58.806  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:47:00.179  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:47:28.571  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     6.0025ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 09:48:38.764  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     4.9306ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 09:50:09.892  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     3.9239ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 09:50:55.147  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:50:56.577  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:51:32.316  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     2.4213ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 09:52:06.391  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     3.5426ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 09:52:10.536  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:53:59.242  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     5.7029ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 09:54:33.413  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     4.9774ms|   match|[43m PUT     [0m /api/roles/8   r:/api/roles/:id
+2024/12/19 09:55:38.958  [D] [router.go:1306]  |            ::1|[42m 200 [0m|    26.4092ms|   match|[43m PUT     [0m /api/roles/8   r:/api/roles/:id
+2024/12/19 09:55:47.581  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:55:49.021  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:56:43.144  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:56:45.776  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     7.3571ms|   match|[43m PUT     [0m /api/roles/8   r:/api/roles/:id
+2024/12/19 09:56:47.081  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:56:49.606  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     6.0246ms|   match|[43m PUT     [0m /api/roles/8   r:/api/roles/:id
+2024/12/19 09:56:51.586  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:56:53.959  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:57:05.157  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:57:06.323  [D] [router.go:1306]  |            ::1|[42m 200 [0m|    16.9536ms|   match|[43m PUT     [0m /api/roles/8   r:/api/roles/:id
+2024/12/19 09:57:07.790  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:57:11.187  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 09:58:01.264  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     2.5581ms|   match|[44m GET     [0m /api/roles/8   r:/api/roles/:id
+2024/12/19 09:58:28.789  [D] [router.go:1306]  |            ::1|[43m 401 [0m|           0s| nomatch|[44m GET     [0m /api/roles
+2024/12/19 09:59:05.696  [D] [router.go:1306]  |            ::1|[42m 200 [0m|      3.172ms|   match|[44m GET     [0m /api/roles   r:/api/roles
+2024/12/19 09:59:33.926  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     4.4652ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 09:59:46.626  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     3.0164ms|   match|[41m DELETE  [0m /api/roles/9   r:/api/roles/:id
+2024/12/19 09:59:56.965  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     4.5105ms|   match|[46m POST    [0m /api/roles   r:/api/roles
+2024/12/19 10:00:13.083  [D] [router.go:1306]  |            ::1|[42m 200 [0m|      1.708ms|   match|[41m DELETE  [0m /api/roles/9   r:/api/roles/:id
+2024/12/19 10:00:28.250  [D] [router.go:1306]  |            ::1|[42m 200 [0m|     4.4653ms|   match|[41m DELETE  [0m /api/roles/10   r:/api/roles/:id
+2024/12/19 10:02:29.988  [I] [server.go:280]  http server Running on http://:8082
+2024/12/19 10:02:30.515  [D] [router.go:1306]  |            ::1|[42m 200 [0m|   165.6934ms|   match|[41m DELETE  [0m /api/roles/10   r:/api/roles/:id
+2024/12/19 10:02:31.737  [I] [server.go:280]  http server Running on http://:8082
