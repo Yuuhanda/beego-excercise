@@ -19,9 +19,17 @@ func InitRoutes() {
     // Public routes
     web.Router("/auth/login", &controllers.AuthController{}, "post:Login")
 
+    //RBAC
+    // Routes Scanner
+    web.Router("/api/routes/scan", &controllers.APIRouteController{}, "post:ScanRoutes")
+    web.Router("/api/routes/list", &controllers.APIRouteController{}, "get:ListRoutes")
+    web.Router("/api/routes/:id", &controllers.APIRouteController{}, "get:Get;delete:DeleteRoute")
+
     // Admin-only route with multiple middleware
     web.InsertFilter("/user", web.BeforeRouter, middleware.AuthMiddleware())
     web.InsertFilter("/user", web.BeforeRouter, middleware.AdminMiddleware())
+    web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AuthMiddleware())
+    web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AdminMiddleware())
     web.Router("/user", &controllers.UserController{}, "post:CreateUser")
 
     // Other protected routes
@@ -56,38 +64,34 @@ func InitRoutes() {
     web.Router("/api/item/:id/image", &controllers.ItemController{}, "get:GetItemImage")
 
     // Item Category Routes
-    categoryCtrl := controllers.NewItemCategoryController()
-    web.Router("/api/categories", categoryCtrl, "get:List")
-    web.Router("/api/categories/:id", categoryCtrl, "get:Get")
-    web.Router("/api/categories", categoryCtrl, "post:Create")
-    web.Router("/api/categories/:id", categoryCtrl, "put:Update")
-    web.Router("/api/categories/:id", categoryCtrl, "delete:Delete")
+    web.Router("/api/categories", &controllers.ItemCategoryController{}, "get:List")
+    web.Router("/api/categories/:id", &controllers.ItemCategoryController{}, "get:Get")
+    web.Router("/api/categories", &controllers.ItemCategoryController{}, "post:Create")
+    web.Router("/api/categories/:id", &controllers.ItemCategoryController{}, "put:Update")
+    web.Router("/api/categories/:id", &controllers.ItemCategoryController{}, "delete:Delete")
 
-    employeeCtrl := controllers.NewEmployeeController()
     // Employee Routes
-    web.Router("/api/employees", employeeCtrl, "post:Create")
-    web.Router("/api/employees/:id", employeeCtrl, "get:Get")
-    web.Router("/api/employees", employeeCtrl, "get:List")
-    web.Router("/api/employees/:id", employeeCtrl, "put:Update")
-    web.Router("/api/employees/:id", employeeCtrl, "delete:Delete")
+    web.Router("/api/employees", &controllers.EmployeeController{}, "post:Create")
+    web.Router("/api/employees/:id", &controllers.EmployeeController{}, "get:Get")
+    web.Router("/api/employees", &controllers.EmployeeController{}, "get:List")
+    web.Router("/api/employees/:id", &controllers.EmployeeController{}, "put:Update")
+    web.Router("/api/employees/:id", &controllers.EmployeeController{}, "delete:Delete")
 
     // Lending Routes
-    lendingCtrl := &controllers.LendingController{}
-    web.Router("/api/lendings", lendingCtrl, "post:Create")
-    web.Router("/api/lendings/:id", lendingCtrl, "get:Get")
-    web.Router("/api/lendings", lendingCtrl, "get:List")
-    web.Router("/api/lendings/:id", lendingCtrl, "put:Update")
-    web.Router("/api/lendings/:id", lendingCtrl, "delete:Delete")
+    web.Router("/api/lendings", &controllers.LendingController{}, "post:Create")
+    web.Router("/api/lendings/:id", &controllers.LendingController{}, "get:Get")
+    web.Router("/api/lendings", &controllers.LendingController{}, "get:List")
+    web.Router("/api/lendings/:id", &controllers.LendingController{}, "put:Update")
+    web.Router("/api/lendings/:id", &controllers.LendingController{}, "delete:Delete")
     web.Router("/api/lendings/report/items", &controllers.LendingController{}, "get:SearchItemReport")
     web.Router("/api/lendings/report/units", &controllers.LendingController{}, "get:SearchUnitReport")
     web.Router("/api/lendings/return/:id", &controllers.LendingController{}, "put:Return")
     // Lending images routes
     web.Router("/api/lending/:id/loan-image", &controllers.LendingController{}, "get:GetLoanImage")
     web.Router("/api/lending/:id/return-image", &controllers.LendingController{}, "get:GetReturnImage")
-
     // Additional lending-specific routes
-    web.Router("/api/lendings/active", lendingCtrl, "get:GetActiveLoans")
-    web.Router("/api/lendings/returned", lendingCtrl, "get:GetReturnedLoans")
+    web.Router("/api/lendings/active", &controllers.LendingController{}, "get:GetActiveLoans")
+    web.Router("/api/lendings/returned", &controllers.LendingController{}, "get:GetReturnedLoans")
     
     // Unit Log Routes
     web.Router("/api/unit-logs", &controllers.UnitLogController{}, "post:Create;get:List")
@@ -124,4 +128,5 @@ func InitRoutes() {
     //condition lookup routes
     web.Router("/api/condition/:id", &controllers.ConditionLookupController{}, "get:GetCondition")
     web.Router("/api/conditions", &controllers.ConditionLookupController{}, "get:ListConditions")
+
 }
