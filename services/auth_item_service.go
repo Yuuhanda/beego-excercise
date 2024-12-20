@@ -115,20 +115,17 @@ func (s *AuthItemService) CreateBulk(role string, paths []string) error {
         return errors.New("role not found")
     }
 
+    // Delete existing permissions for this role
+    _, err = s.ormer.Raw("DELETE FROM auth_item WHERE role = ?", role).Exec()
+    if err != nil {
+        return err
+    }
+
     // Use single ormer instance
     o := orm.NewOrm()
     
+    // Insert new permissions
     for _, path := range paths {
-        // Check if combination already exists
-        exists := o.QueryTable(new(models.AuthItem)).
-            Filter("role", role).
-            Filter("path", path).
-            Exist()
-        if exists {
-            continue
-        }
-
-        // Create new auth item
         authItem := &models.AuthItem{
             Role: role,
             Path: path,

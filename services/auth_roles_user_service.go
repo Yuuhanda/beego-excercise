@@ -17,6 +17,12 @@ func NewAuthRolesUserService() *AuthRolesUserService {
 }
 
 func (s *AuthRolesUserService) Create(roleUser *models.AuthRolesUser) error {
+    // Delete existing role assignment for this user
+    _, err := s.ormer.Raw("DELETE FROM auth_roles_user WHERE user_id = ?", roleUser.UserId.Id).Exec()
+    if err != nil {
+        return err
+    }
+    
     // Get the role first
     role := &models.AuthRoles{Code: roleUser.RoleId.Code}
     if err := s.ormer.Read(role); err != nil {
@@ -31,10 +37,11 @@ func (s *AuthRolesUserService) Create(roleUser *models.AuthRolesUser) error {
     }
     roleUser.UserId = user
 
-    // Create the assignment
-    _, err := s.ormer.Insert(roleUser)
+    // Create the new assignment
+    _, err = s.ormer.Insert(roleUser)
     return err
 }
+
 
 
 
