@@ -4,7 +4,6 @@ import (
     "errors"
     "github.com/beego/beego/v2/client/orm"
     "myproject/models"
-    //filter 
 )
 
 type AuthItemService struct {
@@ -115,17 +114,29 @@ func (s *AuthItemService) CreateBulk(role string, paths []string) error {
         return errors.New("role not found")
     }
 
-    // Delete existing permissions for this role
-    _, err = s.ormer.Raw("DELETE FROM auth_item WHERE role = ?", role).Exec()
-    if err != nil {
-        return err
-    }
-
-    // Use single ormer instance
     o := orm.NewOrm()
     
     // Insert new permissions
     for _, path := range paths {
+        // Verify path exists in api_route table
+        pathExists := o.QueryTable("api_route").Filter("path", path).Exist()
+        if err != nil {
+            return err
+        }
+        if !pathExists {
+            continue // Skip this path and continue with next one
+        }
+
+        // Check if combination already exists
+        exists := o.QueryTable(new(models.AuthItem)).
+            Filter("role", role).
+            Filter("path", path).
+            Exist()
+        
+        if exists {
+            continue // Skip this path and continue with next one
+        }
+
         authItem := &models.AuthItem{
             Role: role,
             Path: path,
@@ -138,7 +149,6 @@ func (s *AuthItemService) CreateBulk(role string, paths []string) error {
 
     return nil
 }
-
 
 func (s *AuthItemService) CheckPermission(role, path, method string) (bool, error) {
     count, err := s.ormer.QueryTable(new(models.AuthItem)).

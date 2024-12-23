@@ -149,4 +149,6 @@ func InitRoutes() {
     web.Router("/api/condition/:id", &controllers.ConditionLookupController{}, "get:GetCondition")
     web.Router("/api/conditions", &controllers.ConditionLookupController{}, "get:ListConditions")
 
+    web.Router("/test/condition/:id", &controllers.ConditionLookupController{}, "get:GetCondition")
+    web.Router("/test/conditions", &controllers.ConditionLookupController{}, "get:ListConditions")
 }
