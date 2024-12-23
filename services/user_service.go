@@ -21,8 +21,26 @@ func NewUserService() *UserService {
     }
 }
 
-// Create creates a new user
+// Create creates a new user with uniqueness checks
 func (s *UserService) Create(user *models.User) error {
+    // Check username uniqueness
+    existingUser := &models.User{Username: user.Username}
+    err := s.ormer.Read(existingUser, "Username")
+    if err == nil {
+        return errors.New("username already exists")
+    } else if err != orm.ErrNoRows {
+        return err
+    }
+
+    // Check email uniqueness
+    existingUser = &models.User{Email: user.Email}
+    err = s.ormer.Read(existingUser, "Email")
+    if err == nil {
+        return errors.New("email already exists")
+    } else if err != orm.ErrNoRows {
+        return err
+    }
+
     user.CreatedAt = time.Now()
     user.UpdatedAt = time.Now()
     
@@ -30,9 +48,10 @@ func (s *UserService) Create(user *models.User) error {
         user.Status = 1 // Default status
     }
     
-    _, err := s.ormer.Insert(user)
+    _, err = s.ormer.Insert(user)
     return err
 }
+
 
 // GetByID retrieves user by ID
 func (s *UserService) GetByID(id int) (*models.User, error) {
