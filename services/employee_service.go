@@ -4,6 +4,7 @@ import (
     "errors"
     "github.com/beego/beego/v2/client/orm"
     "myproject/models"
+    "fmt"
 )
 
 type EmployeeService struct {
@@ -18,10 +19,29 @@ func NewEmployeeService() *EmployeeService {
 
 // Create creates a new employee
 func (s *EmployeeService) Create(employee *models.Employee) error {
+    // Check email uniqueness
+    existingEmployee := &models.Employee{Email: employee.Email}
+    err := s.ormer.Read(existingEmployee, "Email")
+    if err == nil {
+        return fmt.Errorf("employee with email '%s' already exists", employee.Email)
+    } else if err != orm.ErrNoRows {
+        return err
+    }
+
+    // Check phone uniqueness
+    existingEmployee = &models.Employee{Phone: employee.Phone}
+    err = s.ormer.Read(existingEmployee, "Phone")
+    if err == nil {
+        return fmt.Errorf("employee with phone number '%s' already exists", employee.Phone)
+    } else if err != orm.ErrNoRows {
+        return err
+    }
+
     o := orm.NewOrm()
-    _, err := o.Insert(employee)
+    _, err = o.Insert(employee)
     return err
 }
+
 
 // GetByID retrieves employee by ID
 func (s *EmployeeService) GetByID(id uint) (*models.Employee, error) {
