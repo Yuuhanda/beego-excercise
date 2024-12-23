@@ -82,9 +82,29 @@ func (s *ItemService) GetByID(id uint) (*models.Item, error) {
 
 
 func (s *ItemService) Create(item *models.Item) error {
+    // Check ItemName uniqueness
+    existingItem := &models.Item{ItemName: item.ItemName}
+    err := s.ormer.Read(existingItem, "ItemName")
+    if err == nil {
+        return fmt.Errorf("item with name '%s' already exists", item.ItemName)
+    } else if err != orm.ErrNoRows {
+        return err
+    }
+
+    // Check SKU uniqueness if SKU is provided
+    if item.SKU != "" {
+        existingItem = &models.Item{SKU: item.SKU}
+        err = s.ormer.Read(existingItem, "SKU")
+        if err == nil {
+            return fmt.Errorf("item with SKU '%s' already exists", item.SKU)
+        } else if err != orm.ErrNoRows {
+            return err
+        }
+    }
+
     o := orm.NewOrm()
     // Create the item
-    _, err := o.Insert(item)
+    _, err = o.Insert(item)
     if err != nil {
         return err
     }
@@ -92,6 +112,7 @@ func (s *ItemService) Create(item *models.Item) error {
     o.LoadRelated(item, "Category")
     return nil
 }
+
 
 
 func (s *ItemService) Update(item *models.Item) error {

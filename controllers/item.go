@@ -86,7 +86,7 @@ func (c *ItemController) CreateItem() {
     if err := c.itemService.Create(item); err != nil {
         c.Data["json"] = map[string]interface{}{
             "success": false,
-            "message": "Failed to create item",
+            "message": err.Error(),
         }
     } else {
         c.Data["json"] = map[string]interface{}{
