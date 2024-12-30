@@ -29,6 +29,9 @@ func AuthMiddleware() web.FilterFunc {
             return
         }
 
+        // Store user in context for later use
+        ctx.Input.SetData("user", user)
+
         // Get user roles
         roleUserService := services.NewAuthRolesUserService()
         roles, err := roleUserService.GetRolesByUserId(user.Id)
@@ -61,8 +64,5 @@ func AuthMiddleware() web.FilterFunc {
             }, true, false)
             return
         }
-
-        // Store user in context for later use
-        ctx.Input.SetData("user", user)
     }
 }

@@ -21,6 +21,7 @@ func (s *AuthItemService) Create(authItem *models.AuthItem) error {
     count, err := s.ormer.QueryTable(new(models.AuthItem)).
         Filter("role", authItem.Role).
         Filter("path", authItem.Path).
+        Filter("method", authItem.Method).
         Count()
     if err != nil {
         return err
@@ -35,10 +36,13 @@ func (s *AuthItemService) Create(authItem *models.AuthItem) error {
         return errors.New("role not found")
     }
 
-    // Verify path exists
-    count, err = s.ormer.QueryTable("api_route").Filter("path", authItem.Path).Count()
+    // Verify path and method combination exists
+    count, err = s.ormer.QueryTable("api_route").
+        Filter("path", authItem.Path).
+        Filter("method", authItem.Method).
+        Count()
     if err != nil || count == 0 {
-        return errors.New("path not found")
+        return errors.New("path and method combination not found")
     }
 
     _, err = s.ormer.Insert(authItem)
@@ -107,7 +111,7 @@ func (s *AuthItemService) Delete(id int) error {
     return err
 }
 
-func (s *AuthItemService) CreateBulk(role string, paths []string) error {
+func (s *AuthItemService) CreateBulk(role string, paths []models.PathMethod) error {
     // Verify role exists first
     count, err := s.ormer.QueryTable("auth_roles").Filter("code", role).Count()
     if err != nil || count == 0 {
@@ -117,29 +121,33 @@ func (s *AuthItemService) CreateBulk(role string, paths []string) error {
     o := orm.NewOrm()
     
     // Insert new permissions
-    for _, path := range paths {
-        // Verify path exists in api_route table
-        pathExists := o.QueryTable("api_route").Filter("path", path).Exist()
-        if err != nil {
-            return err
-        }
+    for _, pathData := range paths {
+        // Verify path and method combination exists
+        pathExists := o.QueryTable("api_route").
+            Filter("path", pathData.Path).
+            Filter("method", pathData.Method).
+            Exist()
+        
+        // Skip if path-method combination doesn't exist
         if !pathExists {
-            continue // Skip this path and continue with next one
+            continue
         }
 
         // Check if combination already exists
         exists := o.QueryTable(new(models.AuthItem)).
             Filter("role", role).
-            Filter("path", path).
+            Filter("path", pathData.Path).
+            Filter("method", pathData.Method).
             Exist()
         
         if exists {
-            continue // Skip this path and continue with next one
+            continue // Skip this combination and continue with next one
         }
 
         authItem := &models.AuthItem{
-            Role: role,
-            Path: path,
+            Role:   role,
+            Path:   pathData.Path,
+            Method: pathData.Method,
         }
         _, err = o.Insert(authItem)
         if err != nil {
@@ -149,7 +157,6 @@ func (s *AuthItemService) CreateBulk(role string, paths []string) error {
 
     return nil
 }
-
 func (s *AuthItemService) CheckPermission(role, path, method string) (bool, error) {
     count, err := s.ormer.QueryTable(new(models.AuthItem)).
         Filter("role", role).
