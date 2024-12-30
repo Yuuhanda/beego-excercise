@@ -339,8 +339,8 @@ func (c *ItemController) SearchDashboard() {
 
 // GetItemImage serves the item's image file
 // @router /item/:id/image [get]
-//can be used <img src="http://your-api-domain/item/123/image" alt="Item Image">
-//and const imageUrl = `http://your-api-domain/item/${itemId}/image`;
+//can be used <img src="http://your-api-domain/item/image/123" alt="Item Image">
+//and const imageUrl = `http://your-api-domain/item/image/${itemId}`;
 func (c *ItemController) GetItemImage() {
     idStr := c.Ctx.Input.Param(":id")
     var id uint

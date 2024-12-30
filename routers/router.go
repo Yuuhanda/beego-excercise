@@ -79,7 +79,7 @@ func InitRoutes() {
     web.Router("/api/items", &controllers.ItemController{}, "get:ListItems")
     web.Router("/api/items/dashboard", &controllers.ItemController{}, "get:SearchDashboard")
     //item image route
-    web.Router("/api/item/:id/image", &controllers.ItemController{}, "get:GetItemImage")
+    web.Router("/api/item-image/:id", &controllers.ItemController{}, "get:GetItemImage")
 
     // Item Category Routes
     web.Router("/api/categories", &controllers.ItemCategoryController{}, "get:List")
@@ -105,8 +105,8 @@ func InitRoutes() {
     web.Router("/api/lendings/report/units", &controllers.LendingController{}, "get:SearchUnitReport")
     web.Router("/api/lendings/return/:id", &controllers.LendingController{}, "put:Return")
     // Lending images routes
-    web.Router("/api/lending/:id/loan-image", &controllers.LendingController{}, "get:GetLoanImage")
-    web.Router("/api/lending/:id/return-image", &controllers.LendingController{}, "get:GetReturnImage")
+    web.Router("/api/lending/loan-image/:id", &controllers.LendingController{}, "get:GetLoanImage")
+    web.Router("/api/lending/return-image/:id", &controllers.LendingController{}, "get:GetReturnImage")
     // Additional lending-specific routes
     web.Router("/api/lendings/active", &controllers.LendingController{}, "get:GetActiveLoans")
     web.Router("/api/lendings/returned", &controllers.LendingController{}, "get:GetReturnedLoans")

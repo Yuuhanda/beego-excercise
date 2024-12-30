@@ -182,6 +182,8 @@ func (s *AuthItemService) CheckPermission(role, path, method string) (bool, erro
                 segments[i] = ":serialNumber"
             case "visits":
                 segments[i] = ":id"
+            case "unit":
+                segments[i] = ":unitId"
             default:
                 // For numeric segments use :id
                 if _, err := strconv.Atoi(segment); err == nil {
