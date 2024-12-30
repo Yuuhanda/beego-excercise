@@ -4,6 +4,7 @@ import (
     "github.com/beego/beego/v2/server/web/context"
     "github.com/beego/beego/v2/server/web"
     "myproject/services"
+    "log"
 )
 
 func AuthMiddleware() web.FilterFunc {
@@ -43,14 +44,22 @@ func AuthMiddleware() web.FilterFunc {
             return
         }
 
+        // Add after getting roles
+        log.Printf("User Roles: %+v", roles)
+
         // Check if any role has permission for current path
-        currentPath := ctx.Input.URL()
+        currentPath := ctx.Request.URL.Path
         currentMethod := ctx.Input.Method()
         hasPermission := false
+
+        // Add before permission check
+        log.Printf("Checking path: %s method: %s", currentPath, currentMethod)
 
         authItemService := services.NewAuthItemService()
         for _, role := range roles {
             permitted, _ := authItemService.CheckPermission(role.Code, currentPath, currentMethod)
+            log.Printf("Permission check - Role: %s, Path: %s, Method: %s, Result: %v", 
+                role.Code, currentPath, currentMethod, permitted)
             if permitted {
                 hasPermission = true
                 break

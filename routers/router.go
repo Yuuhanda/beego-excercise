@@ -44,30 +44,21 @@ func InitRoutes() {
     web.Router("/api/auth-items/:id", &controllers.AuthItemController{}, "delete:Delete")
     web.Router("/api/auth-items/bulk", &controllers.AuthItemController{}, "post:CreateBulk")
 
-    // Admin-only route with multiple middleware
-    //web.InsertFilter("/user", web.BeforeRouter, middleware.AuthMiddleware())
-    //web.InsertFilter("/user", web.BeforeRouter, middleware.AdminMiddleware())
+    // Access Control Routes
     //web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AuthMiddleware())
     //web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AdminMiddleware())
     //web.InsertFilter("/api/roles/*", web.BeforeRouter, middleware.AuthMiddleware())
     //web.InsertFilter("/api/roles/*", web.BeforeRouter, middleware.AdminMiddleware())
-    web.Router("/user", &controllers.UserController{}, "post:CreateUser")
-
-    // Other protected routes
-    //web.InsertFilter("/user/*", web.BeforeRouter, middleware.AuthMiddleware())
-    //web.InsertFilter("/users", web.BeforeRouter, middleware.AuthMiddleware())
-    //web.InsertFilter("/user/*", web.BeforeRouter, middleware.AdminMiddleware())
-    //web.InsertFilter("/users", web.BeforeRouter, middleware.AdminMiddleware())
     //web.InsertFilter("/api/*", web.BeforeRouter, middleware.AuthMiddleware())
-
 
     // User Routes
     web.Router("/auth/logout", &controllers.AuthController{}, "post:Logout")
-    web.Router("/user/:id", &controllers.UserController{}, "get:GetUser")
-    web.Router("/user/:id", &controllers.UserController{}, "put:UpdateUser")
-    web.Router("/user/:id", &controllers.UserController{}, "delete:DeleteUser")
-    web.Router("/users", &controllers.UserController{}, "get:ListUsers")
-    web.Router("/user/:id/visits", &controllers.UserVisitLogController{}, "get:GetUserVisits")
+    web.Router("/api/user/:id", &controllers.UserController{}, "get:GetUser")
+    web.Router("/api/user/:id", &controllers.UserController{}, "put:UpdateUser")
+    web.Router("/api/user/:id", &controllers.UserController{}, "delete:DeleteUser")
+    web.Router("/api/users", &controllers.UserController{}, "get:ListUsers")
+    web.Router("/api/user/:id/visits", &controllers.UserVisitLogController{}, "get:GetUserVisits")
+    web.Router("/user", &controllers.UserController{}, "post:CreateUser")
 
     // API routes
     // ItemUnit routes using the initialized controller instance
