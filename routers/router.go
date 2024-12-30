@@ -3,7 +3,7 @@ package routers
 import (
     "github.com/beego/beego/v2/server/web"
     "myproject/controllers"
-    "myproject/middleware"
+    //"myproject/middleware"
     "myproject/database"
 )
 
@@ -23,7 +23,8 @@ func InitRoutes() {
     // Routes Scanner
     web.Router("/api/routes/scan", &controllers.APIRouteController{}, "post:ScanRoutes")
     web.Router("/api/routes/list", &controllers.APIRouteController{}, "get:ListRoutes")
-    web.Router("/api/routes/:id", &controllers.APIRouteController{}, "get:Get;delete:DeleteRoute")
+    web.Router("/api/routes/:id", &controllers.APIRouteController{}, "get:Get")
+    web.Router("/api/routes/:id", &controllers.APIRouteController{}, "delete:DeleteRoute")
     // Auth Roles Routes
     web.Router("/api/roles", &controllers.AuthRolesController{}, "post:Create")
     web.Router("/api/roles/:id", &controllers.AuthRolesController{}, "get:Get")
@@ -44,19 +45,22 @@ func InitRoutes() {
     web.Router("/api/auth-items/bulk", &controllers.AuthItemController{}, "post:CreateBulk")
 
     // Admin-only route with multiple middleware
-    web.InsertFilter("/user", web.BeforeRouter, middleware.AuthMiddleware())
-    web.InsertFilter("/user", web.BeforeRouter, middleware.AdminMiddleware())
-    web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AuthMiddleware())
-    web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AdminMiddleware())
-    web.InsertFilter("/api/roles/*", web.BeforeRouter, middleware.AuthMiddleware())
-    web.InsertFilter("/api/roles/*", web.BeforeRouter, middleware.AdminMiddleware())
+    //web.InsertFilter("/user", web.BeforeRouter, middleware.AuthMiddleware())
+    //web.InsertFilter("/user", web.BeforeRouter, middleware.AdminMiddleware())
+    //web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AuthMiddleware())
+    //web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AdminMiddleware())
+    //web.InsertFilter("/api/roles/*", web.BeforeRouter, middleware.AuthMiddleware())
+    //web.InsertFilter("/api/roles/*", web.BeforeRouter, middleware.AdminMiddleware())
     web.Router("/user", &controllers.UserController{}, "post:CreateUser")
 
     // Other protected routes
-    web.InsertFilter("/user/*", web.BeforeRouter, middleware.AuthMiddleware())
-    web.InsertFilter("/users", web.BeforeRouter, middleware.AuthMiddleware())
-    web.InsertFilter("/api/*", web.BeforeRouter, middleware.AuthMiddleware())
-    
+    //web.InsertFilter("/user/*", web.BeforeRouter, middleware.AuthMiddleware())
+    //web.InsertFilter("/users", web.BeforeRouter, middleware.AuthMiddleware())
+    //web.InsertFilter("/user/*", web.BeforeRouter, middleware.AdminMiddleware())
+    //web.InsertFilter("/users", web.BeforeRouter, middleware.AdminMiddleware())
+    //web.InsertFilter("/api/*", web.BeforeRouter, middleware.AuthMiddleware())
+
+
     // User Routes
     web.Router("/auth/logout", &controllers.AuthController{}, "post:Logout")
     web.Router("/user/:id", &controllers.UserController{}, "get:GetUser")
@@ -77,7 +81,9 @@ func InitRoutes() {
 
     // Item routes using the initialized controller instance
     web.Router("/api/item", &controllers.ItemController{}, "post:CreateItem")
-    web.Router("/api/item/:id", &controllers.ItemController{}, "get:GetItem;put:UpdateItem;delete:DeleteItem")
+    web.Router("/api/item/:id", &controllers.ItemController{}, "get:GetItem")
+    web.Router("/api/item/:id", &controllers.ItemController{}, "put:UpdateItem")
+    web.Router("/api/item/:id", &controllers.ItemController{}, "delete:DeleteItem")
     web.Router("/api/items", &controllers.ItemController{}, "get:ListItems")
     web.Router("/api/items/dashboard", &controllers.ItemController{}, "get:SearchDashboard")
     //item image route
@@ -115,18 +121,24 @@ func InitRoutes() {
     
     // Unit Log Routes
     web.Router("/api/unit-logs", &controllers.UnitLogController{}, "post:Create;get:List")
-    web.Router("/api/unit-logs/:id", &controllers.UnitLogController{}, "get:Get;put:Update;delete:Delete")
+    web.Router("/api/unit-logs/:id", &controllers.UnitLogController{}, "get:Get")
+    web.Router("/api/unit-logs/:id", &controllers.UnitLogController{}, "put:Update")
+    web.Router("/api/unit-logs/:id", &controllers.UnitLogController{}, "delete:Delete")
     web.Router("/api/unit-logs/unit/:unitId", &controllers.UnitLogController{}, "get:GetByUnit")
 
     // Repair Log Routes
     web.Router("/api/repair-logs", &controllers.RepairLogController{}, "post:Create;get:List")
-    web.Router("/api/repair-logs/:id", &controllers.RepairLogController{}, "get:Get;put:Update;delete:Delete")
+    web.Router("/api/repair-logs/:id", &controllers.RepairLogController{}, "get:Get")
+    web.Router("/api/repair-logs/:id", &controllers.RepairLogController{}, "delete:Delete")
+    web.Router("/api/repair-logs/:id", &controllers.RepairLogController{}, "put:Update")
     web.Router("/api/repair-logs/unit/:unitId", &controllers.RepairLogController{}, "get:GetByUnit")
     web.Router("/api/repair-logs/finish", &controllers.RepairLogController{}, "post:Finish")
 
     // Document Upload Routes
     web.Router("/api/docs", &controllers.DocUploadedController{}, "post:Create;get:List")
-    web.Router("/api/docs/:id", &controllers.DocUploadedController{}, "get:Get;delete:Delete")
+    web.Router("/api/docs", &controllers.DocUploadedController{}, "get:List")
+    web.Router("/api/docs/:id", &controllers.DocUploadedController{}, "get:Get")
+    web.Router("/api/docs/:id", &controllers.DocUploadedController{}, "delete:Delete")
     // Template download
     web.Router("/api/docs/template/download", &controllers.DocUploadedController{}, "get:DownloadTemplate")
     // Upload Document
