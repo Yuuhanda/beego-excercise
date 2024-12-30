@@ -56,10 +56,16 @@ func AuthMiddleware() web.FilterFunc {
         log.Printf("Checking path: %s method: %s", currentPath, currentMethod)
 
         authItemService := services.NewAuthItemService()
+        permissionChecks := []map[string]interface{}{}
+        
         for _, role := range roles {
             permitted, _ := authItemService.CheckPermission(role.Code, currentPath, currentMethod)
-            log.Printf("Permission check - Role: %s, Path: %s, Method: %s, Result: %v", 
-                role.Code, currentPath, currentMethod, permitted)
+            permissionChecks = append(permissionChecks, map[string]interface{}{
+                "role": role.Code,
+                "path": currentPath,
+                "method": currentMethod,
+                "permitted": permitted,
+            })
             if permitted {
                 hasPermission = true
                 break
@@ -70,8 +76,8 @@ func AuthMiddleware() web.FilterFunc {
             ctx.Output.JSON(map[string]interface{}{
                 "success": false,
                 "message": "Access denied",
+                "permission_checks": permissionChecks,
             }, true, false)
             return
-        }
-    }
+        }    }
 }

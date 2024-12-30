@@ -4,6 +4,8 @@ import (
     "errors"
     "github.com/beego/beego/v2/client/orm"
     "myproject/models"
+    "strings"
+    "strconv"
 )
 
 type AuthItemService struct {
@@ -157,11 +159,41 @@ func (s *AuthItemService) CreateBulk(role string, paths []models.PathMethod) err
 
     return nil
 }
+
 func (s *AuthItemService) CheckPermission(role, path, method string) (bool, error) {
-    count, err := s.ormer.QueryTable(new(models.AuthItem)).
-        Filter("role", role).
-        Filter("path", path).
-        Count()
+    // First try exact match
+    var count int
+    sql := "SELECT COUNT(*) FROM auth_item WHERE role = ? AND path = ? AND method = ?"
+    err := s.ormer.Raw(sql, role, path, method).QueryRow(&count)
+    
+    if count > 0 {
+        return true, err
+    }
+
+    // Handle parameterized paths
+    segments := strings.Split(path, "/")
+    for i, segment := range segments {
+        // Convert segments after specific keywords to their parameter names
+        if i > 0 {
+            switch segments[i-1] {
+            case "warehouse":
+                segments[i] = ":warehouseId"
+            case "serial":
+                segments[i] = ":serialNumber"
+            case "visits":
+                segments[i] = ":id"
+            default:
+                // For numeric segments use :id
+                if _, err := strconv.Atoi(segment); err == nil {
+                    segments[i] = ":id"
+                }
+            }
+        }
+    }
+    normalizedPath := strings.Join(segments, "/")
+    
+    // Try again with normalized path
+    err = s.ormer.Raw(sql, role, normalizedPath, method).QueryRow(&count)
     
     return count > 0, err
 }

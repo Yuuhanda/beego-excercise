@@ -3,7 +3,7 @@ package routers
 import (
     "github.com/beego/beego/v2/server/web"
     "myproject/controllers"
-    //"myproject/middleware"
+    "myproject/middleware"
     "myproject/database"
 )
 
@@ -45,11 +45,9 @@ func InitRoutes() {
     web.Router("/api/auth-items/bulk", &controllers.AuthItemController{}, "post:CreateBulk")
 
     // Access Control Routes
-    //web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AuthMiddleware())
-    //web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AdminMiddleware())
-    //web.InsertFilter("/api/roles/*", web.BeforeRouter, middleware.AuthMiddleware())
-    //web.InsertFilter("/api/roles/*", web.BeforeRouter, middleware.AdminMiddleware())
-    //web.InsertFilter("/api/*", web.BeforeRouter, middleware.AuthMiddleware())
+    web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AuthMiddleware())
+    web.InsertFilter("/api/roles/*", web.BeforeRouter, middleware.AuthMiddleware())
+    web.InsertFilter("/api/*", web.BeforeRouter, middleware.AuthMiddleware())
 
     // User Routes
     web.Router("/auth/logout", &controllers.AuthController{}, "post:Logout")
@@ -57,8 +55,8 @@ func InitRoutes() {
     web.Router("/api/user/:id", &controllers.UserController{}, "put:UpdateUser")
     web.Router("/api/user/:id", &controllers.UserController{}, "delete:DeleteUser")
     web.Router("/api/users", &controllers.UserController{}, "get:ListUsers")
-    web.Router("/api/user/:id/visits", &controllers.UserVisitLogController{}, "get:GetUserVisits")
-    web.Router("/user", &controllers.UserController{}, "post:CreateUser")
+    web.Router("/api/user/visits/:id", &controllers.UserVisitLogController{}, "get:GetUserVisits")
+    web.Router("/api/user", &controllers.UserController{}, "post:CreateUser")
 
     // API routes
     // ItemUnit routes using the initialized controller instance
