@@ -48,6 +48,9 @@ func InitRoutes() {
     web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AuthMiddleware())
     web.InsertFilter("/api/roles/*", web.BeforeRouter, middleware.AuthMiddleware())
     web.InsertFilter("/api/*", web.BeforeRouter, middleware.AuthMiddleware())
+    web.InsertFilter("/api/routes/*", web.BeforeRouter, middleware.AdminMiddleware())
+    web.InsertFilter("/api/roles/*", web.BeforeRouter, middleware.AdminMiddleware())
+    web.InsertFilter("/api/*", web.BeforeRouter, middleware.AdminMiddleware())
 
     // User Routes
     web.Router("/auth/logout", &controllers.AuthController{}, "post:Logout")
