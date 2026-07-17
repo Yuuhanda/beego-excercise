@@ -2,7 +2,7 @@ module myproject
 
 go 1.25.0
 
-require github.com/beego/beego/v2 v2.3.3
+require github.com/beego/beego/v2 v2.3.6
 
 require (
 	github.com/go-sql-driver/mysql v1.8.1
